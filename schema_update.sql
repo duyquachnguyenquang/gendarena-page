@@ -49,7 +49,7 @@ INSERT INTO competition_phases (
   submission_type,
   event_type
 ) VALUES
-(1, 'Vòng sơ loại: DREAM', 'GenD Arena 2026 là sàn đấu khởi nghiệp hiện đại, nơi thế hệ số Việt Nam giải quyết những vấn đề thị trường khó nhằn bằng các bài toán công nghệ tối ưu. Cuộc thi được đồng tổ chức bởi CLB Khởi nghiệp (SSE) và CLB Entrepreneurship (FIC) cùng đội ngũ chuyên gia đông đảo đến từ đa lĩnh vực.', '2026-09-01', '2026-09-20', 'upcoming', 'target', 1, false, 'file', 'round'),
+(1, 'Gia hạn đăng ký vòng Sơ loại: DREAM', 'GenD Arena 2026 là sàn đấu khởi nghiệp hiện đại, nơi thế hệ số Việt Nam giải quyết những vấn đề thị trường khó nhằn bằng các bài toán công nghệ tối ưu. Cuộc thi được đồng tổ chức bởi CLB Khởi nghiệp (SSE) và CLB Entrepreneurship (FIC) cùng đội ngũ chuyên gia đông đảo đến từ đa lĩnh vực.', '2026-09-01', '2026-09-22', 'upcoming', 'target', 1, false, 'file', 'round'),
 (2, 'Sự kiện kick-off', 'Khởi động cuộc thi, giới thiệu lộ trình và luật chơi chi tiết của GenD Arena 2026.', '2026-09-06', '2026-09-06', 'upcoming', 'flag', 2, false, 'file', 'event'),
 (3, 'Webinar ARENA BOOSTER: Scouting', 'Buổi hội thảo định hướng, tìm kiếm ý tưởng đột phá và thành lập đội thi.', '2026-09-12', '2026-09-12', 'upcoming', 'book', 3, false, 'file', 'webinar'),
 (4, 'Webinar ARENA BOOSTER: Forging', 'Trang bị kiến thức và kỹ năng thiết kế mô hình kinh doanh bền vững.', '2026-09-13', '2026-09-13', 'upcoming', 'book', 4, false, 'file', 'webinar'),

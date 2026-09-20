@@ -58,7 +58,7 @@ export default async function HomePage() {
   const opensAt = targetPhase?.submission_opens_at ? new Date(targetPhase.submission_opens_at).getTime() : 0
   const closesAt = targetPhase?.submission_closes_at ? new Date(targetPhase.submission_closes_at).getTime() : 0
 
-  let computedDate = '2026-09-20T23:59:00+07:00'
+  let computedDate = '2026-09-22T23:59:59+07:00'
   let computedLabel = 'Đếm ngược đóng cổng nộp bài'
 
   if (opensAt && now < opensAt) {
@@ -68,12 +68,12 @@ export default async function HomePage() {
     computedDate = targetPhase.submission_closes_at
     computedLabel = 'Đếm ngược đóng cổng nộp bài'
   } else if (targetPhase?.end_date) {
-    computedDate = `${targetPhase.end_date}T23:59:00+07:00`
+    computedDate = `${targetPhase.end_date}T23:59:59+07:00`
     computedLabel = 'Đếm ngược kết thúc vòng'
   }
 
   const targetDate = savedConfig?.targetDate || computedDate
-  const phaseTitle = savedConfig?.phaseTitle || targetPhase?.title || 'Kết thúc Vòng sơ loại GenD Arena: Dream'
+  const phaseTitle = savedConfig?.phaseTitle || targetPhase?.title || 'Gia hạn đăng ký vòng Sơ loại: DREAM'
   const label = savedConfig?.label || computedLabel
 
   return (

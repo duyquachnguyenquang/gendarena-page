@@ -76,8 +76,8 @@ export async function GET() {
       phases?.find((p) => p.submission_open) ||
       phases?.[0]
 
-    let fallbackDate = '2026-09-20T23:59:00+07:00'
-    let fallbackTitle = activePhase?.title || 'Kết thúc Vòng sơ loại GenD Arena: Dream'
+    let fallbackDate = '2026-09-22T23:59:59+07:00'
+    let fallbackTitle = activePhase?.title || 'Gia hạn đăng ký vòng Sơ loại: DREAM'
     let fallbackLabel = 'Đếm ngược đóng cổng nộp bài'
     let fallbackMilestone: 'open' | 'close' | 'custom' = 'close'
 
@@ -94,7 +94,7 @@ export async function GET() {
         fallbackLabel = 'Đếm ngược đóng cổng nộp bài'
         fallbackMilestone = 'close'
       } else if (activePhase.end_date) {
-        fallbackDate = `${activePhase.end_date}T23:59:00+07:00`
+        fallbackDate = `${activePhase.end_date}T23:59:59+07:00`
         fallbackLabel = 'Đếm ngược kết thúc vòng'
         fallbackMilestone = 'close'
       }

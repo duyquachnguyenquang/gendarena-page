@@ -536,7 +536,7 @@ export async function submitUnifiedSubmission(
       summary: existing.file_name || existing.submission_url,
     })
 
-    const { error: historyError } = await supabase.from('submission_history').insert({
+    let { error: historyError } = await supabase.from('submission_history').insert({
       team_id: existing.team_id,
       phase_id: existing.phase_id,
       file_name: existing.file_name,
@@ -549,6 +549,24 @@ export async function submitUnifiedSubmission(
       reason: historyReason,
       topic: existing.topic,
     })
+
+    if (historyError && historyError.message?.includes('submission_kind_check')) {
+      const fallbackHistoryKind = existing.file_path ? 'file' : 'link'
+      const retryHistory = await supabase.from('submission_history').insert({
+        team_id: existing.team_id,
+        phase_id: existing.phase_id,
+        file_name: existing.file_name,
+        file_size: existing.file_size,
+        submission_kind: fallbackHistoryKind,
+        submission_url: existing.submission_url,
+        uploaded_by: existing.uploaded_by,
+        uploaded_at: existing.uploaded_at,
+        deleted_at: new Date().toISOString(),
+        reason: historyReason,
+        topic: existing.topic,
+      })
+      historyError = retryHistory.error
+    }
 
     if (historyError) {
       console.error('DB history insert error:', historyError)
@@ -569,7 +587,7 @@ export async function submitUnifiedSubmission(
     }
 
     // Step 4.3: Update existing submission row
-    const { error: updateError } = await supabase
+    let { error: updateError } = await supabase
       .from('submissions')
       .update({
         file_path: summaryFilePath,
@@ -585,6 +603,27 @@ export async function submitUnifiedSubmission(
         topic,
       })
       .eq('id', existing.id)
+
+    if (updateError && updateError.message?.includes('submission_kind_check') && submissionKind === 'both') {
+      const fallbackKind = hasFiles ? 'file' : 'link'
+      const retryUpdate = await supabase
+        .from('submissions')
+        .update({
+          file_path: summaryFilePath,
+          file_name: summaryFileName,
+          file_size: totalBytes,
+          file_type: filesToUpload[0]?.type || null,
+          submission_url: summaryUrl,
+          submission_kind: fallbackKind,
+          uploaded_by: userId,
+          uploaded_at: new Date().toISOString(),
+          status: 'submitted',
+          notes: notesJson,
+          topic,
+        })
+        .eq('id', existing.id)
+      updateError = retryUpdate.error
+    }
 
     if (updateError) {
       console.error('DB update error:', updateError)
@@ -605,7 +644,7 @@ export async function submitUnifiedSubmission(
     return { ok: true, data: undefined }
   } else {
     // ─── INSERT FLOW ───────────────────────────────────────────────────────────
-    const { error: dbError } = await supabase.from('submissions').insert({
+    let { error: dbError } = await supabase.from('submissions').insert({
       team_id: teamId,
       phase_id: phaseId,
       file_path: summaryFilePath,
@@ -620,6 +659,26 @@ export async function submitUnifiedSubmission(
       notes: notesJson,
       topic,
     })
+
+    if (dbError && dbError.message?.includes('submission_kind_check') && submissionKind === 'both') {
+      const fallbackKind = hasFiles ? 'file' : 'link'
+      const retryInsert = await supabase.from('submissions').insert({
+        team_id: teamId,
+        phase_id: phaseId,
+        file_path: summaryFilePath,
+        file_name: summaryFileName,
+        file_size: totalBytes,
+        file_type: filesToUpload[0]?.type || null,
+        submission_url: summaryUrl,
+        submission_kind: fallbackKind,
+        uploaded_by: userId,
+        uploaded_at: new Date().toISOString(),
+        status: 'submitted',
+        notes: notesJson,
+        topic,
+      })
+      dbError = retryInsert.error
+    }
 
     if (dbError) {
       console.error('DB insert error:', dbError)
