@@ -273,85 +273,28 @@ export async function exportSubmissionsToExcel(
       })
     )
 
-    // ── 5. Build Sheet 1: Tổng hợp bài nộp & Chấm điểm ───────────────────────
+    // ── 5. Build Sheet 1: Danh sách bài thi ──────────────────────────────────
     type Sheet1Row = {
       'STT': number
-      'Tên đội thi': string
-      'Chủ đề dự thi': string
-      'Vòng thi': string
-      'Thời gian nộp': string
-      'Họ tên Trưởng đội': string
-      'SĐT Trưởng đội': string
-      'Email Trưởng đội': string
-      'Trường của Trưởng đội': string
-      'Danh sách thành viên khác': string
-      'Slide Pitch-Deck (Loại)': string
-      'Slide Pitch-Deck (Tên file/Nền tảng)': string
-      'Link mở Slide Pitch-Deck': string
-      'Báo cáo Đề án (Loại)': string
-      'Báo cáo Đề án (Tên file/Nền tảng)': string
+      'Tên đội': string
+      'Tên đội trưởng': string
+      'Lĩnh vực': string
+      'Link mở Pitch-Deck': string
       'Link mở Báo cáo Đề án': string
-      'Dung lượng tổng': string
-      'Trạng thái': string
-      'Điểm hệ thống': string | number
-      '[BGK Chấm] Điểm Tiêu chí 1': string
-      '[BGK Chấm] Điểm Tiêu chí 2': string
-      '[BGK Chấm] Điểm Tiêu chí 3': string
-      '[BGK Chấm] Điểm Tiêu chí 4': string
-      '[BGK Chấm] Tổng điểm': string
-      '[BGK Chấm] Nhận xét đánh giá': string
     }
 
     const sheet1Data: Sheet1Row[] = submissionRowsWithUrls.map((item, index) => {
-      const { raw, team, phase, attachments, pitchDeckUrl, reportUrl, scoreInfo, members } = item
+      const { raw, team, pitchDeckUrl, reportUrl, members } = item
 
       const leader = members.find((m) => m.role === 'leader') || members[0]
-      const otherMembers = members.filter((m) => m !== leader)
-      const otherMembersText = otherMembers.length > 0
-        ? otherMembers
-            .map((m) => `${m.full_name || 'Thành viên'} (${m.university || 'Chưa rõ trường'}${m.phone ? ` - ${m.phone}` : ''})`)
-            .join('; ')
-        : 'Không có thành viên khác'
-
-      const pdKind = attachments?.pitch_deck?.kind === 'file' ? 'File tải lên' : 'Link trực tuyến'
-      const pdName = attachments?.pitch_deck?.file_name || (attachments?.pitch_deck?.url ? 'Link trực tuyến' : 'Slide Pitch-Deck')
-      const rpKind = attachments?.report?.kind === 'file' ? 'File tải lên' : 'Link trực tuyến'
-      const rpName = attachments?.report?.file_name || (attachments?.report?.url ? 'Link trực tuyến' : 'Báo cáo Đề án')
-
-      const statusMap: Record<string, string> = {
-        pending: 'Chờ chấm',
-        submitted: 'Đã nộp',
-        scored: 'Đã chấm',
-        reviewing: 'Đang xem',
-        rejected: 'Từ chối',
-      }
 
       return {
         'STT': index + 1,
-        'Tên đội thi': team?.name || 'Đội thi',
-        'Chủ đề dự thi': raw.topic || 'Chưa chọn',
-        'Vòng thi': phase?.title || options.phaseTitle || 'Vòng Sơ loại',
-        'Thời gian nộp': new Date(raw.uploaded_at).toLocaleString('vi-VN'),
-        'Họ tên Trưởng đội': leader?.full_name || 'Chưa cập nhật',
-        'SĐT Trưởng đội': leader?.phone || '',
-        'Email Trưởng đội': leader?.email || '',
-        'Trường của Trưởng đội': leader?.university || '',
-        'Danh sách thành viên khác': otherMembersText,
-        'Slide Pitch-Deck (Loại)': pdKind,
-        'Slide Pitch-Deck (Tên file/Nền tảng)': pdName,
-        'Link mở Slide Pitch-Deck': pitchDeckUrl || 'Không có',
-        'Báo cáo Đề án (Loại)': rpKind,
-        'Báo cáo Đề án (Tên file/Nền tảng)': rpName,
+        'Tên đội': team?.name || 'Đội thi',
+        'Tên đội trưởng': leader?.full_name || 'Chưa cập nhật',
+        'Lĩnh vực': raw.topic || 'Chưa chọn',
+        'Link mở Pitch-Deck': pitchDeckUrl || 'Không có',
         'Link mở Báo cáo Đề án': reportUrl || 'Không có',
-        'Dung lượng tổng': raw.file_size ? formatBytes(raw.file_size) : '—',
-        'Trạng thái': statusMap[raw.status] || raw.status,
-        'Điểm hệ thống': scoreInfo ? scoreInfo.total_score : '',
-        '[BGK Chấm] Điểm Tiêu chí 1': '',
-        '[BGK Chấm] Điểm Tiêu chí 2': '',
-        '[BGK Chấm] Điểm Tiêu chí 3': '',
-        '[BGK Chấm] Điểm Tiêu chí 4': '',
-        '[BGK Chấm] Tổng điểm': '',
-        '[BGK Chấm] Nhận xét đánh giá': '',
       }
     })
 
@@ -436,30 +379,11 @@ export async function exportSubmissionsToExcel(
     // Set column widths for Sheet 1
     ws1['!cols'] = [
       { wch: 6 },  // STT
-      { wch: 24 }, // Tên đội thi
-      { wch: 22 }, // Chủ đề dự thi
-      { wch: 24 }, // Vòng thi
-      { wch: 18 }, // Thời gian nộp
-      { wch: 22 }, // Họ tên Trưởng đội
-      { wch: 14 }, // SĐT Trưởng đội
-      { wch: 26 }, // Email Trưởng đội
-      { wch: 28 }, // Trường của Trưởng đội
-      { wch: 40 }, // Danh sách thành viên khác
-      { wch: 16 }, // Slide Pitch-Deck (Loại)
-      { wch: 30 }, // Slide Pitch-Deck (Tên file/Nền tảng)
-      { wch: 55 }, // Link mở Slide Pitch-Deck
-      { wch: 16 }, // Báo cáo Đề án (Loại)
-      { wch: 30 }, // Báo cáo Đề án (Tên file/Nền tảng)
-      { wch: 55 }, // Link mở Báo cáo Đề án
-      { wch: 14 }, // Dung lượng tổng
-      { wch: 12 }, // Trạng thái
-      { wch: 14 }, // Điểm hệ thống
-      { wch: 16 }, // [BGK Chấm] Điểm Tiêu chí 1
-      { wch: 16 }, // [BGK Chấm] Điểm Tiêu chí 2
-      { wch: 16 }, // [BGK Chấm] Điểm Tiêu chí 3
-      { wch: 16 }, // [BGK Chấm] Điểm Tiêu chí 4
-      { wch: 16 }, // [BGK Chấm] Tổng điểm
-      { wch: 35 }, // [BGK Chấm] Nhận xét đánh giá
+      { wch: 28 }, // Tên đội
+      { wch: 26 }, // Tên đội trưởng
+      { wch: 32 }, // Lĩnh vực
+      { wch: 65 }, // Link mở Pitch-Deck
+      { wch: 65 }, // Link mở Báo cáo Đề án
     ]
 
     // Embed clickable hyperlinks into Sheet 1 for Slide and Report URLs
@@ -467,9 +391,9 @@ export async function exportSubmissionsToExcel(
     submissionRowsWithUrls.forEach((item, idx) => {
       const rowIndex = idx + 1 // 1-based index in sheet (row 0 is header)
       
-      // Column L is 'Link mở Slide Pitch-Deck' (0-indexed col 12)
+      // Column E is 'Link mở Pitch-Deck' (0-indexed col 4)
       if (item.pitchDeckUrl && item.pitchDeckUrl.startsWith('http')) {
-        const cellRef = XLSX.utils.encode_cell({ c: 12, r: rowIndex })
+        const cellRef = XLSX.utils.encode_cell({ c: 4, r: rowIndex })
         if (ws1[cellRef]) {
           ws1[cellRef].l = {
             Target: item.pitchDeckUrl,
@@ -478,9 +402,9 @@ export async function exportSubmissionsToExcel(
         }
       }
 
-      // Column O is 'Link mở Báo cáo Đề án' (0-indexed col 15)
+      // Column F is 'Link mở Báo cáo Đề án' (0-indexed col 5)
       if (item.reportUrl && item.reportUrl.startsWith('http')) {
-        const cellRef = XLSX.utils.encode_cell({ c: 15, r: rowIndex })
+        const cellRef = XLSX.utils.encode_cell({ c: 5, r: rowIndex })
         if (ws1[cellRef]) {
           ws1[cellRef].l = {
             Target: item.reportUrl,
@@ -490,7 +414,7 @@ export async function exportSubmissionsToExcel(
       }
     })
 
-    XLSX.utils.book_append_sheet(wb, ws1, 'Tổng hợp bài nộp & Chấm điểm')
+    XLSX.utils.book_append_sheet(wb, ws1, 'Danh sách bài thi')
 
     // Sheet 2
     const ws2 = XLSX.utils.json_to_sheet(sheet2Data)

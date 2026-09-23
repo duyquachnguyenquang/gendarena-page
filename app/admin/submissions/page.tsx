@@ -626,7 +626,7 @@ function ExportExcelModal({
         setIsExporting(false)
       } else {
         onExportSuccess(
-          `Đã xuất thành công ${res.count} bài nộp ra file "${res.filename}"! File gồm Sheet 1 (Chấm điểm BGK) và Sheet 2 (Chi tiết thí sinh của các đội được chọn).`
+          `Đã xuất thành công ${res.count} bài nộp ra file "${res.filename}"! File gồm Sheet 1 (Danh sách bài thi) và Sheet 2 (Chi tiết thí sinh của các đội được chọn).`
         )
         onClose()
       }
@@ -830,10 +830,10 @@ function ExportExcelModal({
           <div className="p-3 rounded-lg border border-surface-border bg-surface-overlay text-[11px] text-text-secondary space-y-1">
             <div className="flex items-center gap-1.5 font-semibold text-text-primary">
               <FileSpreadsheet className="size-3.5 text-emerald-400 shrink-0" />
-              <span>Cấu trúc xuất: Sheet 1 (Bài nộp & Điểm) + Sheet 2 (Danh sách thí sinh)</span>
+              <span>Cấu trúc xuất: Sheet 1 (Danh sách bài thi) + Sheet 2 (Danh sách thí sinh)</span>
             </div>
             <p className="text-text-tertiary">
-              File Excel tải về sẽ <strong>chỉ chứa {selectedIds.size} bài nộp được chọn</strong> và <strong>thông tin thí sinh của các đội thi tương ứng</strong>. Link tải file mở trực tiếp trong 30 ngày cho BGK.
+              File Excel tải về sẽ gồm: <strong>Sheet 1</strong> (Tên đội, Tên đội trưởng, Lĩnh vực, Link mở Pitch-Deck, Link mở Báo cáo Đề án) và <strong>Sheet 2</strong> (Danh sách chi tiết thí sinh của các đội được chọn). Link tải file mở trực tiếp trong 30 ngày cho BGK.
             </p>
           </div>
 
