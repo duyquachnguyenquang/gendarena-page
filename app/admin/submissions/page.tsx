@@ -33,7 +33,6 @@ import {
   CheckCircle,
   XCircle,
   AlertCircle,
-  Link2,
   Scale,
   Pencil,
   BookOpen,
@@ -41,7 +40,14 @@ import {
   MessageSquare,
   Presentation,
   FileSpreadsheet,
+  Download,
+  Search,
+  CheckSquare,
+  Square,
+  Check,
+  X,
 } from 'lucide-react'
+import { exportSubmissionsToExcel } from '@/services/exportSubmissions'
 
 type Phase = { id: string; title: string }
 type TabKey = 'all' | 'pending' | 'scored' | string
@@ -484,6 +490,402 @@ function AdminScoringModal({ submission, rounds, adminId, onClose, onSaved }: Sc
   )
 }
 
+// ─── Export Excel Modal ───────────────────────────────────────────────────────
+
+interface ExportExcelModalProps {
+  phases: Phase[]
+  submissions: AdminSubmissionRow[]
+  initialSelectedIds?: string[]
+  activePhaseId?: string
+  onClose: () => void
+  onExportSuccess: (message: string) => void
+}
+
+function ExportExcelModal({
+  phases,
+  submissions,
+  initialSelectedIds = [],
+  activePhaseId,
+  onClose,
+  onExportSuccess,
+}: ExportExcelModalProps) {
+  const defaultPhaseId = useMemo(() => {
+    if (activePhaseId && activePhaseId !== 'all' && activePhaseId !== 'pending' && activePhaseId !== 'scored') {
+      return activePhaseId
+    }
+    const prelim = phases.find(
+      (p) => p.title.toLowerCase().includes('sơ loại') || p.title.toLowerCase().includes('dream')
+    )
+    return prelim?.id || 'all'
+  }, [phases, activePhaseId])
+
+  const [selectedPhaseId, setSelectedPhaseId] = useState<string>(defaultPhaseId)
+  const [searchQuery, setSearchQuery] = useState('')
+  const [statusFilter, setStatusFilter] = useState<'all' | 'pending' | 'scored'>('all')
+  const [isExporting, setIsExporting] = useState(false)
+  const [errorMsg, setErrorMsg] = useState('')
+
+  // Danh sách bài nộp theo vòng thi được chọn
+  const phaseSubmissions = useMemo(() => {
+    if (selectedPhaseId === 'all') return submissions
+    return submissions.filter((s) => s.phase_id === selectedPhaseId)
+  }, [submissions, selectedPhaseId])
+
+  // Tập hợp ID các bài nộp được chọn để xuất
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(() => {
+    if (initialSelectedIds.length > 0) {
+      return new Set(initialSelectedIds)
+    }
+    // Mặc định chọn tất cả các bài thuộc vòng thi đang hiển thị
+    const initialPool = defaultPhaseId === 'all'
+      ? submissions
+      : submissions.filter((s) => s.phase_id === defaultPhaseId)
+    return new Set(initialPool.map((s) => s.id))
+  })
+
+  // Danh sách bài nộp hiển thị (đã áp dụng lọc Vòng + Tìm kiếm + Trạng thái)
+  const visibleSubmissions = useMemo(() => {
+    return phaseSubmissions.filter((sub) => {
+      // Lọc trạng thái
+      if (statusFilter === 'pending') {
+        const isPending = sub.status === 'pending' || sub.status === 'submitted' || sub.status === 'reviewing'
+        if (!isPending) return false
+      } else if (statusFilter === 'scored') {
+        const isScored = sub.status === 'scored' || (sub.scores && sub.scores.length > 0)
+        if (!isScored) return false
+      }
+
+      // Lọc từ khóa tìm kiếm (tên đội, chủ đề, tên file)
+      if (!searchQuery.trim()) return true
+      const q = searchQuery.toLowerCase().trim()
+      const teamName = (sub.teams?.name || '').toLowerCase()
+      const topic = (sub.topic || '').toLowerCase()
+      const fileName = (sub.file_name || '').toLowerCase()
+      return teamName.includes(q) || topic.includes(q) || fileName.includes(q)
+    })
+  }, [phaseSubmissions, statusFilter, searchQuery])
+
+  // Chọn / bỏ chọn 1 bài
+  const toggleSelect = (id: string) => {
+    setSelectedIds((prev) => {
+      const next = new Set(prev)
+      if (next.has(id)) {
+        next.delete(id)
+      } else {
+        next.add(id)
+      }
+      return next
+    })
+  }
+
+  // Chọn tất cả các bài đang hiển thị theo bộ lọc
+  const handleSelectAllVisible = () => {
+    setSelectedIds((prev) => {
+      const next = new Set(prev)
+      visibleSubmissions.forEach((s) => next.add(s.id))
+      return next
+    })
+  }
+
+  // Bỏ chọn tất cả các bài đang hiển thị
+  const handleDeselectAllVisible = () => {
+    setSelectedIds((prev) => {
+      const next = new Set(prev)
+      visibleSubmissions.forEach((s) => next.delete(s.id))
+      return next
+    })
+  }
+
+  // Xóa toàn bộ lựa chọn
+  const handleClearAll = () => {
+    setSelectedIds(new Set())
+  }
+
+  const allVisibleSelected =
+    visibleSubmissions.length > 0 &&
+    visibleSubmissions.every((s) => selectedIds.has(s.id))
+
+  const handleStartExport = async () => {
+    if (selectedIds.size === 0) {
+      setErrorMsg('Vui lòng chọn ít nhất 1 bài nộp để xuất file Excel.')
+      return
+    }
+
+    setIsExporting(true)
+    setErrorMsg('')
+    try {
+      const targetPhase = phases.find((p) => p.id === selectedPhaseId)
+      const res = await exportSubmissionsToExcel({
+        phaseId: selectedPhaseId === 'all' ? undefined : selectedPhaseId,
+        phaseTitle: selectedPhaseId === 'all' ? 'Tất cả các vòng' : targetPhase?.title,
+        submissionIds: Array.from(selectedIds),
+      })
+
+      if (!res.ok) {
+        setErrorMsg(res.error || 'Xuất file Excel thất bại.')
+        setIsExporting(false)
+      } else {
+        onExportSuccess(
+          `Đã xuất thành công ${res.count} bài nộp ra file "${res.filename}"! File gồm Sheet 1 (Chấm điểm BGK) và Sheet 2 (Chi tiết thí sinh của các đội được chọn).`
+        )
+        onClose()
+      }
+    } catch (err: unknown) {
+      console.error('Export error:', err)
+      const msg = err instanceof Error ? err.message : String(err || 'Đã xảy ra lỗi không xác định khi xuất file.')
+      setErrorMsg(msg)
+      setIsExporting(false)
+    }
+  }
+
+  return (
+    <Dialog open onOpenChange={(open) => !open && !isExporting && onClose()}>
+      <DialogContent className="max-w-2xl p-6">
+        <DialogHeader>
+          <div className="flex items-center gap-2 mb-1">
+            <FileSpreadsheet className="size-5 text-emerald-400" />
+            <DialogTitle className="text-lg font-bold text-text-primary">
+              Xuất dữ liệu bài nộp ra Excel (BGK)
+            </DialogTitle>
+          </div>
+          <DialogDescription>
+            Chọn các bài nộp cần xuất để tạo file Excel. Hệ thống sẽ chỉ xuất bài thi và danh sách thí sinh của các đội thi tương ứng.
+          </DialogDescription>
+        </DialogHeader>
+
+        <div className="space-y-3.5 my-2 text-xs">
+          {/* Controls: Phase Selector + Search */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+            <div>
+              <label className="block text-[11px] font-semibold text-text-secondary mb-1">
+                Lọc theo vòng thi:
+              </label>
+              <select
+                value={selectedPhaseId}
+                onChange={(e) => {
+                  const newPhase = e.target.value
+                  setSelectedPhaseId(newPhase)
+                }}
+                disabled={isExporting}
+                className="w-full h-9 px-3 rounded-lg border border-surface-border bg-surface-raised text-xs text-text-primary outline-none focus:border-brand-cyan focus:ring-1 focus:ring-brand-cyan/30 transition cursor-pointer"
+              >
+                <option value="all">Tất cả các vòng thi ({submissions.length})</option>
+                {phases.map((p) => {
+                  const count = submissions.filter((s) => s.phase_id === p.id).length
+                  return (
+                    <option key={p.id} value={p.id}>
+                      {p.title} ({count})
+                    </option>
+                  )
+                })}
+              </select>
+            </div>
+
+            <div>
+              <label className="block text-[11px] font-semibold text-text-secondary mb-1">
+                Tìm kiếm đội thi / chủ đề:
+              </label>
+              <div className="relative">
+                <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 size-3.5 text-text-tertiary" />
+                <Input
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  placeholder="Nhập tên đội, chủ đề..."
+                  disabled={isExporting}
+                  className="h-9 pl-8 pr-7 text-xs bg-surface-raised border-surface-border"
+                />
+                {searchQuery && (
+                  <button
+                    type="button"
+                    onClick={() => setSearchQuery('')}
+                    className="absolute right-2.5 top-1/2 -translate-y-1/2 text-text-tertiary hover:text-text-primary"
+                  >
+                    <X className="size-3" />
+                  </button>
+                )}
+              </div>
+            </div>
+          </div>
+
+          {/* Quick selection toolbar */}
+          <div className="flex flex-wrap items-center justify-between gap-2 py-2 px-3 rounded-lg bg-surface-overlay border border-surface-border">
+            <div className="flex items-center gap-2">
+              <span className="font-semibold text-text-primary flex items-center gap-1.5">
+                <CheckCircle className="size-3.5 text-emerald-400" />
+                Đã chọn: <span className="text-emerald-400 font-bold">{selectedIds.size}</span> / {phaseSubmissions.length} bài
+              </span>
+            </div>
+
+            <div className="flex items-center gap-2">
+              {allVisibleSelected ? (
+                <button
+                  type="button"
+                  onClick={handleDeselectAllVisible}
+                  disabled={isExporting}
+                  className="text-text-tertiary hover:text-text-primary transition underline text-[11px]"
+                >
+                  Bỏ chọn kết quả hiển thị
+                </button>
+              ) : (
+                <button
+                  type="button"
+                  onClick={handleSelectAllVisible}
+                  disabled={isExporting}
+                  className="text-brand-cyan hover:underline transition font-medium text-[11px]"
+                >
+                  Chọn tất cả hiển thị ({visibleSubmissions.length})
+                </button>
+              )}
+              {selectedIds.size > 0 && (
+                <>
+                  <span className="text-text-disabled">·</span>
+                  <button
+                    type="button"
+                    onClick={handleClearAll}
+                    disabled={isExporting}
+                    className="text-semantic-danger hover:underline transition text-[11px]"
+                  >
+                    Bỏ chọn tất cả
+                  </button>
+                </>
+              )}
+            </div>
+          </div>
+
+          {/* Scrollable list of selectable submissions */}
+          <div className="max-h-64 sm:max-h-72 overflow-y-auto space-y-1.5 p-1 rounded-lg border border-surface-border bg-surface-base/60">
+            {visibleSubmissions.length === 0 ? (
+              <div className="p-8 text-center text-text-tertiary space-y-1">
+                <FileText className="size-8 mx-auto text-text-disabled mb-1" />
+                <p className="font-medium text-text-secondary">Không tìm thấy bài nộp nào</p>
+                <p className="text-[11px]">Thử đổi vòng thi hoặc xóa bớt từ khóa tìm kiếm</p>
+              </div>
+            ) : (
+              visibleSubmissions.map((sub) => {
+                const isChecked = selectedIds.has(sub.id)
+                const scoreRecord = sub.scores?.[0]
+                const hasScore = typeof scoreRecord?.total_score === 'number'
+                const attachments = sub.attachments || parseSubmissionAttachments(sub)
+
+                return (
+                  <div
+                    key={sub.id}
+                    onClick={() => toggleSelect(sub.id)}
+                    className={`flex items-start gap-2.5 p-2.5 rounded-lg border transition-colors cursor-pointer select-none ${
+                      isChecked
+                        ? 'bg-emerald-950/25 border-emerald-500/50 text-text-primary shadow-xs'
+                        : 'bg-surface-overlay/80 border-surface-border hover:border-surface-border-strong text-text-secondary'
+                    }`}
+                  >
+                    <div className="pt-0.5 shrink-0">
+                      <input
+                        type="checkbox"
+                        checked={isChecked}
+                        onChange={() => toggleSelect(sub.id)}
+                        onClick={(e) => e.stopPropagation()}
+                        className="size-4 rounded border-surface-border accent-emerald-500 cursor-pointer"
+                      />
+                    </div>
+                    <div className="flex-1 min-w-0 space-y-1">
+                      <div className="flex flex-wrap items-center gap-1.5">
+                        <span className={`text-xs font-semibold truncate ${isChecked ? 'text-text-primary' : 'text-text-secondary'}`}>
+                          {sub.teams?.name || 'Đội thi'}
+                        </span>
+                        <TopicBadge topic={sub.topic} />
+                        {hasScore ? (
+                          <Badge variant="success" size="sm" className="text-[10px] font-mono py-0">
+                            {scoreRecord?.total_score.toFixed(1)} / 10
+                          </Badge>
+                        ) : (
+                          <Badge variant="default" size="sm" className="text-[10px] py-0">
+                            Chờ chấm
+                          </Badge>
+                        )}
+                      </div>
+                      <div className="flex flex-wrap items-center gap-x-2 text-[11px] text-text-tertiary">
+                        <span>{sub.competition_phases?.title || phases.find((p) => p.id === sub.phase_id)?.title || 'Vòng thi'}</span>
+                        <span>·</span>
+                        <span>{new Date(sub.uploaded_at).toLocaleString('vi-VN')}</span>
+                        {attachments?.pitch_deck && (
+                          <>
+                            <span>·</span>
+                            <span className="text-brand-cyan">Slide</span>
+                          </>
+                        )}
+                        {attachments?.report && (
+                          <>
+                            <span>·</span>
+                            <span className="text-emerald-400">Báo cáo</span>
+                          </>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                )
+              })
+            )}
+          </div>
+
+          {/* Info Card */}
+          <div className="p-3 rounded-lg border border-surface-border bg-surface-overlay text-[11px] text-text-secondary space-y-1">
+            <div className="flex items-center gap-1.5 font-semibold text-text-primary">
+              <FileSpreadsheet className="size-3.5 text-emerald-400 shrink-0" />
+              <span>Cấu trúc xuất: Sheet 1 (Bài nộp & Điểm) + Sheet 2 (Danh sách thí sinh)</span>
+            </div>
+            <p className="text-text-tertiary">
+              File Excel tải về sẽ <strong>chỉ chứa {selectedIds.size} bài nộp được chọn</strong> và <strong>thông tin thí sinh của các đội thi tương ứng</strong>. Link tải file mở trực tiếp trong 30 ngày cho BGK.
+            </p>
+          </div>
+
+          {errorMsg && (
+            <div className="p-3 rounded-lg bg-semantic-danger/10 border border-semantic-danger/30 text-semantic-danger flex items-start gap-2">
+              <AlertCircle className="size-4 shrink-0 mt-0.5" />
+              <span>{errorMsg}</span>
+            </div>
+          )}
+        </div>
+
+        <div className="flex items-center justify-between pt-3 border-t border-surface-border">
+          <div className="text-xs text-text-secondary">
+            {selectedIds.size === 0 ? (
+              <span className="text-semantic-warning">Chưa chọn bài nộp nào</span>
+            ) : (
+              <span>Đã chọn <strong>{selectedIds.size}</strong> bài nộp</span>
+            )}
+          </div>
+          <div className="flex items-center gap-2">
+            <Button
+              type="button"
+              variant="ghost"
+              size="sm"
+              onClick={onClose}
+              disabled={isExporting}
+            >
+              Hủy
+            </Button>
+            <Button
+              type="button"
+              variant="primary"
+              size="sm"
+              leftIcon={<Download className="size-4" />}
+              isLoading={isExporting}
+              disabled={selectedIds.size === 0 || isExporting}
+              onClick={handleStartExport}
+              className="bg-emerald-600 hover:bg-emerald-500 text-white font-medium disabled:opacity-50"
+            >
+              {isExporting
+                ? 'Đang tạo link & file Excel...'
+                : selectedIds.size > 0
+                ? `Bắt đầu xuất Excel (${selectedIds.size} bài)`
+                : 'Chọn bài để xuất'}
+            </Button>
+          </div>
+        </div>
+      </DialogContent>
+    </Dialog>
+  )
+}
+
 // ─── Main Submissions Page ────────────────────────────────────────────────────
 
 export default function AdminSubmissions() {
@@ -496,6 +898,8 @@ export default function AdminSubmissions() {
   const [currentUid, setCurrentUid] = useState<string>('')
   const [successToast, setSuccessToast] = useState<string | null>(null)
   const [scoringSubmission, setScoringSubmission] = useState<AdminSubmissionRow | null>(null)
+  const [showExportModal, setShowExportModal] = useState(false)
+  const [selectedSubmissionIds, setSelectedSubmissionIds] = useState<string[]>([])
 
   const router = useRouter()
   const supabase = useMemo(() => createClient(), [])
@@ -511,9 +915,10 @@ export default function AdminSubmissions() {
       setSubmissions(subs)
       setRounds(roundsData)
       setPhases(phasesRes.data ?? [])
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('Failed to load submissions:', err)
-      setError(err?.message || 'Không thể tải danh sách bài nộp.')
+      const msg = err instanceof Error ? err.message : String(err || 'Không thể tải danh sách bài nộp.')
+      setError(msg)
     }
   }, [supabase])
 
@@ -609,6 +1014,17 @@ export default function AdminSubmissions() {
               </p>
             </div>
             <div className="flex items-center gap-2">
+              <Button
+                variant="secondary"
+                size="md"
+                leftIcon={<Download className="size-4 text-emerald-400" />}
+                onClick={() => setShowExportModal(true)}
+                className="border-emerald-500/40 hover:border-emerald-500/70 hover:bg-emerald-500/10 text-emerald-300 font-semibold"
+              >
+                {selectedSubmissionIds.length > 0
+                  ? `Xuất Excel (${selectedSubmissionIds.length} bài đã chọn)`
+                  : 'Xuất Excel cho BGK'}
+              </Button>
               <Link href="/admin/scoring">
                 <Button variant="secondary" size="md" leftIcon={<Scale className="size-4" />}>
                   Cấu hình tiêu chí
@@ -687,6 +1103,59 @@ export default function AdminSubmissions() {
           ))}
         </div>
 
+        {/* Submissions List Header & Selection Bar */}
+        <div className="flex flex-wrap items-center justify-between gap-2 text-xs text-text-secondary pt-1">
+          <div className="flex items-center gap-2">
+            <span>Hiển thị <strong>{filtered.length}</strong> bài nộp</span>
+            {selectedSubmissionIds.length > 0 && (
+              <span className="text-emerald-400 font-medium">
+                · Đã chọn {selectedSubmissionIds.length} bài
+              </span>
+            )}
+          </div>
+          {filtered.length > 0 && (
+            <div className="flex items-center gap-2">
+              {filtered.every((s) => selectedSubmissionIds.includes(s.id)) ? (
+                <button
+                  type="button"
+                  onClick={() =>
+                    setSelectedSubmissionIds((prev) =>
+                      prev.filter((id) => !filtered.some((f) => f.id === id))
+                    )
+                  }
+                  className="text-text-tertiary hover:text-text-primary transition underline text-xs"
+                >
+                  Bỏ chọn danh sách này
+                </button>
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => {
+                    const newIds = new Set(selectedSubmissionIds)
+                    filtered.forEach((f) => newIds.add(f.id))
+                    setSelectedSubmissionIds(Array.from(newIds))
+                  }}
+                  className="text-brand-cyan hover:underline transition text-xs font-medium"
+                >
+                  Chọn tất cả {filtered.length} bài trong tab này
+                </button>
+              )}
+              {selectedSubmissionIds.length > 0 && (
+                <>
+                  <span className="text-text-disabled">·</span>
+                  <button
+                    type="button"
+                    onClick={() => setSelectedSubmissionIds([])}
+                    className="text-semantic-danger hover:underline transition text-xs"
+                  >
+                    Xóa chọn
+                  </button>
+                </>
+              )}
+            </div>
+          )}
+        </div>
+
         {/* Submissions List */}
         {filtered.length === 0 ? (
           <Card className="p-12 text-center text-text-tertiary">
@@ -702,36 +1171,60 @@ export default function AdminSubmissions() {
         ) : (
           <div className="space-y-3">
             {filtered.map((sub) => {
+              const isSelected = selectedSubmissionIds.includes(sub.id)
               const scoreRecord = sub.scores?.[0]
               const hasScore = typeof scoreRecord?.total_score === 'number'
               const parsedJudge = parseCommentAndJudge(scoreRecord?.comment)
               const attachments = sub.attachments || parseSubmissionAttachments(sub)
 
               return (
-                <Card key={sub.id} className="p-5 hover:border-surface-border-strong transition-colors duration-150">
+                <Card
+                  key={sub.id}
+                  className={`p-5 transition-colors duration-150 ${
+                    isSelected
+                      ? 'border-emerald-500/50 bg-emerald-950/10'
+                      : 'hover:border-surface-border-strong'
+                  }`}
+                >
                   <div className="flex flex-col sm:flex-row justify-between items-start gap-4">
-                    <div className="flex-1 min-w-0 space-y-2">
-                      {/* Team name + badges */}
-                      <div className="flex flex-wrap items-center gap-2">
-                        <h3 className="font-display text-base font-semibold text-text-primary">
-                          {sub.teams?.name ?? 'Đội thi'}
-                        </h3>
-                        <StatusBadge status={sub.status} />
-                        <TopicBadge topic={sub.topic} />
-
-                        {/* Score Badge */}
-                        {hasScore ? (
-                          <Badge variant="success" size="sm" className="font-mono font-bold">
-                            <CheckCircle className="size-3 mr-1" />
-                            Điểm: {scoreRecord?.total_score.toFixed(1)} / 10
-                          </Badge>
-                        ) : (
-                          <Badge variant="warning" size="sm">
-                            <Clock className="size-3 mr-1" />
-                            Chưa chấm
-                          </Badge>
-                        )}
+                    <div className="flex items-start gap-3 flex-1 min-w-0">
+                      {/* Checkbox for selecting submission */}
+                      <div className="pt-0.5 shrink-0">
+                        <input
+                          type="checkbox"
+                          checked={isSelected}
+                          onChange={() => {
+                            setSelectedSubmissionIds((prev) =>
+                              prev.includes(sub.id) ? prev.filter((id) => id !== sub.id) : [...prev, sub.id]
+                            )
+                          }}
+                          title="Chọn bài này để xuất Excel"
+                          className="size-4 rounded border-surface-border accent-emerald-500 cursor-pointer"
+                        />
                       </div>
+
+                      <div className="flex-1 min-w-0 space-y-2">
+                        {/* Team name + badges */}
+                        <div className="flex flex-wrap items-center gap-2">
+                          <h3 className="font-display text-base font-semibold text-text-primary">
+                            {sub.teams?.name ?? 'Đội thi'}
+                          </h3>
+                          <StatusBadge status={sub.status} />
+                          <TopicBadge topic={sub.topic} />
+
+                          {/* Score Badge */}
+                          {hasScore ? (
+                            <Badge variant="success" size="sm" className="font-mono font-bold">
+                              <CheckCircle className="size-3 mr-1" />
+                              Điểm: {scoreRecord?.total_score.toFixed(1)} / 10
+                            </Badge>
+                          ) : (
+                            <Badge variant="warning" size="sm">
+                              <Clock className="size-3 mr-1" />
+                              Chưa chấm
+                            </Badge>
+                          )}
+                        </div>
 
                       {/* Phase + Timestamp */}
                       <p className="text-xs text-text-tertiary">
@@ -796,6 +1289,7 @@ export default function AdminSubmissions() {
                         </div>
                       )}
                     </div>
+                  </div>
 
                     {/* Actions */}
                     <div className="flex items-center gap-2 shrink-0 self-end sm:self-center">
@@ -827,6 +1321,50 @@ export default function AdminSubmissions() {
             loadData()
           }}
           onClose={() => setScoringSubmission(null)}
+        />
+      )}
+
+      {/* Floating Action Bar when submissions are selected */}
+      {selectedSubmissionIds.length > 0 && (
+        <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-30 flex items-center gap-3 px-4 py-2.5 rounded-xl bg-surface-overlay/95 border border-emerald-500/40 shadow-elevation-3 backdrop-blur-md animate-in slide-in-from-bottom-4 duration-200">
+          <div className="flex items-center gap-2">
+            <CheckCircle className="size-4 text-emerald-400" />
+            <span className="text-xs sm:text-sm font-semibold text-text-primary whitespace-nowrap">
+              Đã chọn {selectedSubmissionIds.length} bài nộp
+            </span>
+          </div>
+          <div className="h-4 w-px bg-surface-border" />
+          <Button
+            variant="primary"
+            size="sm"
+            leftIcon={<Download className="size-3.5" />}
+            onClick={() => setShowExportModal(true)}
+            className="bg-emerald-600 hover:bg-emerald-500 text-white font-medium text-xs shadow-xs"
+          >
+            Xuất Excel ({selectedSubmissionIds.length})
+          </Button>
+          <button
+            type="button"
+            onClick={() => setSelectedSubmissionIds([])}
+            className="text-text-secondary hover:text-text-primary text-xs underline whitespace-nowrap"
+          >
+            Bỏ chọn
+          </button>
+        </div>
+      )}
+
+      {/* Export Excel Modal */}
+      {showExportModal && (
+        <ExportExcelModal
+          phases={phases}
+          submissions={submissions}
+          initialSelectedIds={selectedSubmissionIds}
+          activePhaseId={activeTab}
+          onClose={() => setShowExportModal(false)}
+          onExportSuccess={(msg) => {
+            setSuccessToast(msg)
+            setSelectedSubmissionIds([])
+          }}
         />
       )}
     </div>
