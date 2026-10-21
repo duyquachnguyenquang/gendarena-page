@@ -15,6 +15,7 @@ import TopicsSection from '@/components/topics-section'
 import SpeakersSection from '@/components/speakers-section'
 import SponsorsSection from '@/components/sponsors-section'
 import TimelineSection from '@/components/timeline-section'
+import VotingShowcaseSection from '@/components/voting-showcase-section'
 import { RevealOnScroll } from '@/components/motion/reveal-on-scroll'
 import { siteConfig } from '@/config/site'
 import { Button } from '@/components/ui/button'
@@ -282,6 +283,11 @@ export default function LandingClient({
       {/* ─── SECTION 2.5: TOPICS / TRACKS ────────────────────────────────── */}
       <RevealOnScroll>
         <TopicsSection />
+      </RevealOnScroll>
+
+      {/* ─── SECTION 2.7: VOTING ROUND 3 SHOWCASE ────────────────────────── */}
+      <RevealOnScroll>
+        <VotingShowcaseSection />
       </RevealOnScroll>
 
       {/* ─── SECTION 3: TIMELINE ────────────────────────────────────────── */}

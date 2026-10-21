@@ -35,6 +35,7 @@ export const siteConfig = {
   
   navItems: [
     { label: "Trang chủ", href: "/" },
+    { label: "Bình chọn Vòng 3", href: "/vote" },
     { label: "Ban tổ chức", href: "/organizers" },
   ],
   

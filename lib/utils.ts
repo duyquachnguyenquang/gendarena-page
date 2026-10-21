@@ -123,3 +123,27 @@ export function formatDob(val: string): string {
   return clean
 }
 
+/**
+ * Chuẩn hóa URL video embed cho iframe từ YouTube hoặc Google Drive
+ */
+export function getVideoEmbedUrl(url?: string | null): string {
+  if (!url) return ''
+  const trimmed = url.trim()
+
+  // Google Drive
+  if (trimmed.includes('drive.google.com')) {
+    if (trimmed.includes('/preview')) return trimmed
+    // Replace /view or /edit with /preview
+    return trimmed.replace(/\/(view|edit)(\?.*)?$/, '/preview')
+  }
+
+  // YouTube
+  if (trimmed.includes('youtube.com') || trimmed.includes('youtu.be')) {
+    if (trimmed.includes('autoplay=')) return trimmed
+    const sep = trimmed.includes('?') ? '&' : '?'
+    return `${trimmed}${sep}autoplay=1&rel=0&modestbranding=1`
+  }
+
+  return trimmed
+}
+

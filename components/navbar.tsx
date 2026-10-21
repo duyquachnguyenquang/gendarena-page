@@ -22,6 +22,7 @@ import {
   Award,
   BadgeCheck,
   CreditCard,
+  Flame,
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -181,6 +182,21 @@ export default function Navbar() {
             <Award className="size-4" />
           </Link>
 
+          {/* Voting Vòng 3 Link */}
+          <Link
+            href="/vote"
+            className={`px-3 h-9 rounded-lg flex items-center gap-1.5 text-xs font-bold transition-all ${
+              pathname.startsWith('/vote')
+                ? 'text-brand-cyan bg-brand-cyan/20 border border-brand-cyan/50 shadow-[0_0_12px_rgba(0,212,255,0.3)]'
+                : 'text-text-primary hover:text-brand-cyan hover:bg-surface-raised border border-brand-cyan/35 bg-surface-raised/70'
+            }`}
+            title="Bình chọn Top 10 Vòng 3"
+          >
+            <Flame className="size-3.5 text-accent-magenta fill-accent-magenta" />
+            <span>Bình chọn Vòng 3</span>
+            <span className="size-1.5 rounded-full bg-brand-cyan animate-pulse" />
+          </Link>
+
           {/* Participant Hub Icon */}
           {isParticipant && (
             <Link
@@ -333,6 +349,23 @@ export default function Navbar() {
           <Link href="/organizers" className={getMobileLinkClass('/organizers')}>
             <Award className="size-4 text-brand-cyan" />
             <span>Ban tổ chức</span>
+          </Link>
+
+          <Link
+            href="/vote"
+            className={`flex items-center justify-between w-full px-4 py-2.5 rounded-lg text-sm font-semibold transition-colors ${
+              pathname.startsWith('/vote')
+                ? 'text-brand-cyan bg-brand-cyan/20 border border-brand-cyan/30'
+                : 'text-text-primary bg-gradient-to-r from-brand-cyan/10 via-surface-raised to-accent-magenta/10 hover:bg-brand-cyan/15'
+            }`}
+          >
+            <div className="flex items-center gap-3">
+              <Flame className="size-4 text-accent-magenta fill-accent-magenta" />
+              <span>Bình chọn Top 10 Vòng 3</span>
+            </div>
+            <Badge variant="brand" size="sm" className="text-[10px] font-bold">
+              Eventista
+            </Badge>
           </Link>
 
           {isParticipant && (
