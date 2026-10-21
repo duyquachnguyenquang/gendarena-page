@@ -9,10 +9,9 @@ import NextTopLoader from "nextjs-toploader"
 import { siteConfig } from "@/config/site"
 import "./globals.css"
 
-// Inter — display/heading font (Latin + Vietnamese subset)
+// Inter — display/heading font (Latin + Vietnamese subset, variable font)
 const inter = Inter({
   subsets: ["latin", "vietnamese"],
-  weight: ["400", "500", "600", "700"],
   variable: "--font-inter",
   display: "swap",
 })
