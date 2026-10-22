@@ -1,6 +1,4 @@
-import * as XLSX from 'xlsx'
 import { createClient } from '@/lib/supabase'
-import { formatBytes } from '@/services/submissions'
 import { parseSubmissionAttachments } from '@/types/submission'
 
 export interface ExportSubmissionsOptions {
@@ -63,6 +61,7 @@ export async function exportSubmissionsToExcel(
   options: ExportSubmissionsOptions = {}
 ): Promise<ExportResult> {
   try {
+    const XLSX = await import('xlsx')
     const supabase = createClient()
 
     // ── 1. Query Submissions ──────────────────────────────────────────────────

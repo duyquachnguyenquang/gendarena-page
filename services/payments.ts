@@ -267,55 +267,86 @@ export async function submitTeamPayment({
       }
     }
 
-    // 2. Gửi qua Server API Route (/api/payments/submit) để xử lý upload an toàn bằng Service Role
-    try {
-      const formData = new FormData()
-      formData.append('teamId', teamId)
-      formData.append('leaderId', leaderId)
-      formData.append('teamName', teamName)
-      formData.append('expectedAmount', String(expectedAmount))
-      formData.append('file', file)
-
-      const apiRes = await fetch('/api/payments/submit', {
-        method: 'POST',
-        body: formData,
-      })
-
-      if (apiRes.ok) {
-        const json = await apiRes.json()
-        if (json.ok) {
-          return { ok: true, receiptUrl: json.receiptUrl }
-        }
-        return { ok: false, error: json.error || 'Gửi biên lai thất bại.' }
-      }
-    } catch (apiErr) {
-      console.warn('[services/payments] Server API upload failed, falling back to direct client upload:', apiErr)
-    }
-
-    // 3. Fallback: Direct Client-Side upload nếu API route không khả dụng
+    // 2. Ưu tiên: Tải trực tiếp từ Trình duyệt lên Supabase Storage (Bypass 4.5MB Payload limit của Vercel)
+    let publicUrl: string | null = null
     const supabase = createClient()
     const ext = file.name.split('.').pop()?.toLowerCase() || 'jpg'
     const fileName = `receipts/${teamId}_${Date.now()}.${ext}`
 
-    const { error: uploadErr } = await supabase.storage
-      .from('payment-receipts')
-      .upload(fileName, file, {
-        contentType: file.type,
-        cacheControl: '3600',
-        upsert: true,
-      })
+    try {
+      const { error: uploadErr } = await supabase.storage
+        .from('payment-receipts')
+        .upload(fileName, file, {
+          contentType: file.type,
+          cacheControl: '3600',
+          upsert: true,
+        })
 
-    if (uploadErr) {
-      console.error('[services/payments] Upload error:', uploadErr)
-      return { ok: false, error: `Không thể tải lên ảnh biên lai: ${uploadErr.message}` }
+      if (!uploadErr) {
+        const { data: urlData } = supabase.storage
+          .from('payment-receipts')
+          .getPublicUrl(fileName)
+        publicUrl = urlData.publicUrl
+      } else {
+        console.warn('[services/payments] Direct storage upload failed, will fallback to server proxy:', uploadErr)
+      }
+    } catch (directUploadErr) {
+      console.warn('[services/payments] Direct client upload exception, will fallback to server proxy:', directUploadErr)
     }
 
-    // 4. Get Public URL
-    const { data: urlData } = supabase.storage
-      .from('payment-receipts')
-      .getPublicUrl(fileName)
+    // 3. Gọi Server API (/api/payments/submit)
+    try {
+      if (publicUrl) {
+        // Gửi JSON siêu nhẹ chứa receiptUrl (hoàn toàn tránh được giới hạn 4.5MB và timeout của Vercel)
+        const apiRes = await fetch('/api/payments/submit', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            teamId,
+            leaderId,
+            teamName,
+            expectedAmount,
+            receiptUrl: publicUrl,
+          }),
+        })
 
-    const publicUrl = urlData.publicUrl
+        if (apiRes.ok) {
+          const json = await apiRes.json()
+          if (json.ok) {
+            return { ok: true, receiptUrl: json.receiptUrl || publicUrl }
+          }
+          return { ok: false, error: json.error || 'Gửi biên lai thất bại.' }
+        }
+      } else {
+        // Fallback: Gửi FormData qua Server API (khi client upload trực tiếp thất bại)
+        const formData = new FormData()
+        formData.append('teamId', teamId)
+        formData.append('leaderId', leaderId)
+        formData.append('teamName', teamName)
+        formData.append('expectedAmount', String(expectedAmount))
+        formData.append('file', file)
+
+        const apiRes = await fetch('/api/payments/submit', {
+          method: 'POST',
+          body: formData,
+        })
+
+        if (apiRes.ok) {
+          const json = await apiRes.json()
+          if (json.ok) {
+            return { ok: true, receiptUrl: json.receiptUrl }
+          }
+          return { ok: false, error: json.error || 'Gửi biên lai thất bại.' }
+        }
+      }
+    } catch (apiErr) {
+      console.warn('[services/payments] Server API submit failed, falling back to direct DB update:', apiErr)
+    }
+
+    // 4. Fallback cuối cùng: Nếu Server API gặp sự cố, cập nhật trực tiếp DB từ client (nếu đã có publicUrl)
+    if (!publicUrl) {
+      return { ok: false, error: 'Không thể tải lên ảnh biên lai thanh toán. Vui lòng thử lại.' }
+    }
 
     // 5. Update teams table
     const submittedAt = new Date().toISOString()

@@ -3,6 +3,9 @@ import fs from 'fs'
 import path from 'path'
 import { createSupabaseServerClient, createSupabaseServiceClient } from '@/lib/supabaseServer'
 
+export const dynamic = 'force-dynamic'
+export const maxDuration = 60
+
 interface CountdownConfig {
   phaseId?: string | null
   phaseTitle: string

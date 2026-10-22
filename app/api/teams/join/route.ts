@@ -3,6 +3,7 @@ import { createSupabaseServiceClient } from '@/lib/supabaseServer'
 import { isProfileComplete } from '@/lib/profile-utils'
 
 export const dynamic = 'force-dynamic'
+export const maxDuration = 60
 
 export async function POST(request: Request) {
   try {

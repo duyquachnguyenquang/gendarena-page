@@ -5,6 +5,7 @@ import type { BrowseTeam, TeamMemberDetail, TeamMemberProfile } from '@/services
 import { isTesterOrAdminRole } from '@/lib/auth/roles'
 
 export const dynamic = 'force-dynamic'
+export const maxDuration = 60
 
 const DEFAULT_PUBLIC_FIELDS: PublicProfileFields = {
   phone: false,

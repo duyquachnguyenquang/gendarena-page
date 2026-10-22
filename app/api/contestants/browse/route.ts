@@ -4,6 +4,7 @@ import { isProfileComplete } from '@/lib/profile-utils'
 import type { PublicProfileFields, TeamingContestant } from '@/types/profile'
 
 export const dynamic = 'force-dynamic'
+export const maxDuration = 60
 
 const DEFAULT_PUBLIC_FIELDS: PublicProfileFields = {
   phone: false,
