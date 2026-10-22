@@ -16,7 +16,6 @@ import {
   Heart,
 } from 'lucide-react'
 import { TeamVote, VotingPhaseStatus } from '@/types/voting'
-import { getVideoEmbedUrl } from '@/lib/utils'
 import EventistaLogo from './EventistaLogo'
 
 interface TeamSlideDrawerProps {
@@ -142,20 +141,18 @@ export default function TeamSlideDrawer({
 
           {/* ─── Scrollable Body ─── */}
           <div className="flex-1 overflow-y-auto px-5 py-5 space-y-5">
-            {/* 1. Video Pitch Player (16:9) */}
+            {/* 1. Team Poster Banner */}
             <div className="space-y-1.5">
               <div className="relative aspect-video w-full rounded-[4px] overflow-hidden bg-surface-base border border-surface-border">
-                <iframe
-                  src={getVideoEmbedUrl(team.videoPitchUrl)}
-                  title={`Video pitch ${team.name}`}
-                  className="size-full border-0"
-                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                  allowFullScreen
+                <img
+                  src={team.posterUrl || team.avatarUrl}
+                  alt={team.name}
+                  className="size-full object-cover"
                 />
               </div>
               <div className="flex items-center justify-between text-[11px] text-text-tertiary font-mono">
-                <span>{team.videoDuration}</span>
                 <span>{team.category}</span>
+                <span>MSBC: #{team.msbc}</span>
               </div>
             </div>
 

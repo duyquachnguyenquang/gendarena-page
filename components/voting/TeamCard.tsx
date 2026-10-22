@@ -111,10 +111,9 @@ export default function TeamCard({
             loading="lazy"
           />
 
-          {/* Video Duration Pill */}
+          {/* Category Pill */}
           <div className="absolute bottom-2 left-2 flex items-center gap-1.5 px-2 py-0.5 rounded bg-surface-base/85 border border-surface-border text-[11px] font-mono text-text-secondary backdrop-blur-sm">
-            <Play className="size-3 fill-brand-cyan text-brand-cyan" />
-            <span>Video Pitch {team.videoDuration}</span>
+            <span>{team.category}</span>
           </div>
 
           {/* Micro-interaction: Animated heart floating when clicked */}
@@ -188,7 +187,7 @@ export default function TeamCard({
             }}
             className="text-xs text-text-tertiary hover:text-brand-cyan transition-colors"
           >
-            Xem video pitch ↗
+            Xem chi tiết đề án ↗
           </button>
         </div>
 

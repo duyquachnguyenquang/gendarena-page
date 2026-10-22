@@ -74,15 +74,6 @@ export default function EditorialTeamCard({
 
         {/* Icon actions — top-right stack */}
         <div className="absolute top-2.5 right-2.5 flex flex-col gap-1.5">
-          {/* Xem video */}
-          <button
-            type="button"
-            onClick={(e) => { e.stopPropagation(); onOpenDrawer(team) }}
-            title="Xem video pitch"
-            className="size-7 rounded-[4px] bg-black/70 border border-white/15 backdrop-blur-sm flex items-center justify-center text-text-secondary hover:text-text-primary hover:bg-black/90 transition-colors"
-          >
-            <Play className="size-3.5 fill-current" />
-          </button>
 
           {/* Xem thông tin */}
           <button

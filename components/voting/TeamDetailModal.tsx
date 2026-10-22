@@ -18,9 +18,7 @@ import {
   GraduationCap,
 } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
-import { Button } from '@/components/ui/button'
 import { TeamVote, VotingPhaseStatus } from '@/types/voting'
-import { getVideoEmbedUrl } from '@/lib/utils'
 import EventistaLogo from './EventistaLogo'
 
 interface TeamDetailModalProps {
@@ -176,42 +174,14 @@ export default function TeamDetailModal({
 
           {/* Scrollable Body */}
           <div className="flex-1 overflow-y-auto p-5 sm:p-6 space-y-5">
-            {/* 1. Video Pitch 15-30s Player */}
+            {/* 1. Team Banner Image */}
             <div className="space-y-2">
               <div className="relative aspect-video w-full rounded-md overflow-hidden bg-surface-base border border-surface-border">
-                <iframe
-                  src={getVideoEmbedUrl(team.videoPitchUrl)}
-                  title={`Video Pitch của ${team.name}`}
-                  className="size-full border-0"
-                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                  allowFullScreen
+                <img
+                  src={team.posterUrl || team.avatarUrl}
+                  alt={team.name}
+                  className="size-full object-cover"
                 />
-              </div>
-
-              {/* Engagement Timer Bar */}
-              <div className="p-3 rounded-md bg-surface-raised border border-surface-border flex flex-col sm:flex-row items-center justify-between gap-2.5 text-xs">
-                <div className="flex items-center gap-2">
-                  <Clock className="size-4 text-brand-cyan shrink-0" />
-                  <span className="text-text-secondary">
-                    {hasWatchedEnough ? (
-                      <span className="text-semantic-success font-medium">
-                        Bạn đã tìm hiểu kỹ dự án ({secondsSpent}s). Hãy gửi tặng 1 vote cổ vũ đội thi!
-                      </span>
-                    ) : (
-                      <span>
-                        Dành 15-30 giây xem video pitch để hiểu rõ dự án của các bạn sinh viên ({secondsSpent}s/25s)
-                      </span>
-                    )}
-                  </span>
-                </div>
-                <div className="w-full sm:w-28 h-1.5 bg-surface-base rounded-full overflow-hidden border border-surface-border shrink-0">
-                  <div
-                    className={`h-full transition-all duration-300 ${
-                      hasWatchedEnough ? 'bg-semantic-success' : 'bg-brand-cyan'
-                    }`}
-                    style={{ width: `${retentionProgress}%` }}
-                  />
-                </div>
               </div>
             </div>
 

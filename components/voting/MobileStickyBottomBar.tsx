@@ -1,7 +1,7 @@
 'use client'
 
 import React from 'react'
-import { ArrowUpRight, Play, Clock, Lock } from 'lucide-react'
+import { ArrowUpRight, Info, Clock, Lock } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { TeamVote, VotingPhaseStatus } from '@/types/voting'
 
@@ -51,10 +51,9 @@ export default function MobileStickyBottomBar({
             variant="secondary"
             size="sm"
             onClick={() => onOpenDetail(currentTeam)}
-            className="h-8 px-2.5 text-xs rounded-[4px]"
-            title="Xem video pitch"
+            title="Xem chi tiết"
           >
-            <Play className="size-3 fill-current" />
+            <Info className="size-3.5" />
           </Button>
 
           {isVotingActive && (

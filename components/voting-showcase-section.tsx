@@ -49,7 +49,7 @@ export default function VotingShowcaseSection() {
             Triển Lãm &amp; Bình Chọn Top 10 Đội Thi
           </h2>
           <p className="text-text-secondary text-sm md:text-base leading-relaxed">
-            Khám phá các đề án công nghệ đột phá, theo dõi video pitch và bình chọn cho đội thi xuất sắc nhất bước vào Đêm Chung Kết.
+            Khám phá các đề án công nghệ đột phá, tìm hiểu câu chuyện của các đội thi và bình chọn cho dự án xuất sắc nhất bước vào Đêm Chung Kết.
           </p>
         </div>
 
@@ -124,12 +124,6 @@ export default function VotingShowcaseSection() {
                     />
                     <div className="absolute inset-0 bg-gradient-to-t from-surface-raised/80 via-transparent to-transparent pointer-events-none" />
 
-                    {/* Play Video icon overlay on hover */}
-                    <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-surface-base/30 backdrop-blur-[2px]">
-                      <div className="size-11 rounded-full bg-brand-cyan/20 border border-brand-cyan text-brand-cyan flex items-center justify-center shadow-glow-cyan transform scale-90 group-hover:scale-100 transition-transform">
-                        <Play className="size-4.5 fill-brand-cyan ml-0.5" />
-                      </div>
-                    </div>
                   </div>
 
                   {/* Team Title */}
@@ -151,7 +145,7 @@ export default function VotingShowcaseSection() {
 
                 {/* Card Action Footer */}
                 <div className="relative z-10 mt-5 pt-3.5 border-t border-surface-border flex items-center justify-between text-xs font-medium text-brand-cyan group-hover:text-brand-cyanBright transition-colors">
-                  <span>Xem video pitch &amp; chi tiết</span>
+                  <span>Khám phá đề án &amp; chi tiết</span>
                   <ArrowRight className="size-4 transition-transform group-hover:translate-x-1" />
                 </div>
               </Card>

@@ -23,8 +23,8 @@ export interface TeamVote {
   members: TeamMember[]
   avatarUrl: string
   posterUrl: string
-  videoPitchUrl: string // YouTube embed URL
-  videoDuration: string
+  videoPitchUrl?: string // Optional embed URL
+  videoDuration?: string
   eventistaUrl: string // Placeholder for Eventista with UTM params
   initialVotes?: number
   viewsCount?: number

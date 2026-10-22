@@ -133,7 +133,7 @@ export default function VotingBanner({
               <>
                 Cổng bình chọn sẽ chính thức mở vào lúc{' '}
                 <strong className="text-text-primary">20:00 ngày 25/10/2026</strong>. Khán giả và bạn bè sinh viên
-                có thể theo dõi video pitch, thả tim cổ vũ và khám phá câu chuyện của 10 đội thi ngay bên dưới!
+                có thể thả tim cổ vũ và khám phá câu chuyện của 10 đội thi ngay bên dưới!
               </>
             )}
             {status === 'ACTIVE' && (
