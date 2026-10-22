@@ -19,6 +19,7 @@ import {
   BarChart2,
   ChevronRight,
   CreditCard,
+  QrCode,
 } from 'lucide-react'
 import Loading from '@/components/loading'
 import DotGridBackground from '@/components/dot-grid-background'
@@ -105,6 +106,7 @@ export default function AdminDashboard() {
   ]
 
   const navItems = [
+    { href: '/admin/booth-voting', icon: QrCode, title: 'Voting Gian hàng Chung kết (08/11)', desc: 'Lấy mã QR riêng cho Top 5 đội thi Chung kết, theo dõi điểm bình chọn Real-time và điều khiển cổng 14:00–15:30' },
     { href: '/admin/payments', icon: CreditCard, title: 'Duyệt lệ phí dự thi', desc: 'Kiểm tra biên lai chuyển khoản và cấp trạng thái Verified cho đội thi' },
     { href: '/admin/competitions', icon: Trophy, title: 'Quản lý cuộc thi', desc: 'Thiết lập, hiệu chỉnh thông số các phân khu đấu trường' },
     { href: '/admin/users', icon: Users, title: 'Quản lý người dùng', desc: 'Giám sát tài khoản và phân quyền quản trị viên, thí sinh' },

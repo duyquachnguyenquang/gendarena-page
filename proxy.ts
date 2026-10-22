@@ -3,6 +3,18 @@ import { NextResponse, type NextRequest } from 'next/server'
 import { getPostLoginPath } from '@/lib/auth/routing'
 
 export async function proxy(request: NextRequest) {
+  const pathname = request.nextUrl.pathname
+
+  // Fast-path bypass for high-concurrency public voting pages & APIs
+  // Prevents redundant Supabase Auth roundtrips during peak QR scan spikes
+  if (
+    pathname.startsWith('/vote') ||
+    pathname.startsWith('/binh-chon') ||
+    pathname.startsWith('/api/booth-vote')
+  ) {
+    return NextResponse.next()
+  }
+
   let response = NextResponse.next({
     request: { headers: request.headers },
   })
@@ -36,8 +48,6 @@ export async function proxy(request: NextRequest) {
   const {
     data: { user },
   } = await supabase.auth.getUser()
-
-  const pathname = request.nextUrl.pathname
 
   if (
     !user &&

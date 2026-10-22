@@ -42,6 +42,12 @@ export default function Navbar() {
   const supabase = useMemo(() => createClient(), [])
 
   useEffect(() => {
+    // Skip Supabase Auth roundtrips on public QR booth voting pages to maximize peak throughput
+    if (pathname.startsWith('/vote/booth')) {
+      setLoading(false)
+      return
+    }
+
     async function loadUser() {
       const {
         data: { user },
