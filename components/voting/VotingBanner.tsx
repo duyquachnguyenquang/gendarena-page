@@ -78,6 +78,9 @@ export default function VotingBanner({
 
   useEffect(() => {
     setMounted(true)
+  }, [])
+
+  useEffect(() => {
     const targetMs = new Date(targetDate).getTime()
     setTimeLeft(calculateTimeRemaining(targetMs))
 
