@@ -1,8 +1,8 @@
 {
-  "phaseId": "53b027f4-7109-4bd6-b185-dc69470df806",
-  "phaseTitle": "Gia hạn đăng ký vòng Sơ loại: DREAM",
-  "targetDate": "2026-09-22T16:59:59.000Z",
-  "label": "Đếm ngược đóng cổng nộp bài",
-  "milestone": "close",
-  "updatedAt": "2026-09-21T06:30:00.000Z"
+  "phaseId": null,
+  "phaseTitle": "Vòng 3: Chung Kết",
+  "targetDate": "2026-11-08T13:00:00+07:00",
+  "label": "Đếm ngược Vòng 3: Chung Kết",
+  "milestone": "custom",
+  "updatedAt": "2026-10-22T19:00:00+07:00"
 }

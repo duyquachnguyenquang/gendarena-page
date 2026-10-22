@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server'
 import fs from 'fs'
 import path from 'path'
-import { createSupabaseServerClient, createSupabaseServiceClient } from '@/lib/supabaseServer'
+import { createSupabaseServiceClient } from '@/lib/supabaseServer'
 
 export const dynamic = 'force-dynamic'
 export const maxDuration = 60
@@ -73,42 +73,13 @@ export async function GET() {
       )
     }
 
-    // Fallback: Compute intelligent default from active phase in DB
-    const activePhase =
-      phases?.find((p) => p.status === 'active') ||
-      phases?.find((p) => p.submission_open) ||
-      phases?.[0]
-
-    let fallbackDate = '2026-09-22T23:59:59+07:00'
-    let fallbackTitle = activePhase?.title || 'Gia hạn đăng ký vòng Sơ loại: DREAM'
-    let fallbackLabel = 'Đếm ngược đóng cổng nộp bài'
-    let fallbackMilestone: 'open' | 'close' | 'custom' = 'close'
-
-    if (activePhase) {
-      const opensAt = activePhase.submission_opens_at ? new Date(activePhase.submission_opens_at).getTime() : 0
-      const closesAt = activePhase.submission_closes_at ? new Date(activePhase.submission_closes_at).getTime() : 0
-
-      if (opensAt && now < opensAt) {
-        fallbackDate = activePhase.submission_opens_at
-        fallbackLabel = 'Đếm ngược mở đơn'
-        fallbackMilestone = 'open'
-      } else if (closesAt && now < closesAt) {
-        fallbackDate = activePhase.submission_closes_at
-        fallbackLabel = 'Đếm ngược đóng cổng nộp bài'
-        fallbackMilestone = 'close'
-      } else if (activePhase.end_date) {
-        fallbackDate = `${activePhase.end_date}T23:59:59+07:00`
-        fallbackLabel = 'Đếm ngược kết thúc vòng'
-        fallbackMilestone = 'close'
-      }
-    }
-
+    // Fallback: Default to Round 3 configuration
     const fallbackConfig: CountdownConfig = {
-      phaseId: activePhase?.id || null,
-      phaseTitle: fallbackTitle,
-      targetDate: fallbackDate,
-      label: fallbackLabel,
-      milestone: fallbackMilestone,
+      phaseId: null,
+      phaseTitle: 'Vòng 3: Chung Kết',
+      targetDate: '2026-11-08T13:00:00+07:00',
+      label: 'Đếm ngược Vòng 3: Chung Kết',
+      milestone: 'custom',
       updatedAt: new Date().toISOString(),
     }
 
@@ -137,122 +108,11 @@ export async function GET() {
 }
 
 export async function POST(req: Request) {
-  try {
-    // 1. Verify user is admin
-    const userClient = await createSupabaseServerClient()
-    const {
-      data: { user },
-    } = await userClient.auth.getUser()
-
-    if (!user) {
-      return NextResponse.json(
-        { success: false, error: 'Unauthorized: Vui lòng đăng nhập tài khoản BTC.' },
-        { status: 401 }
-      )
-    }
-
-    const { data: profile } = await userClient
-      .from('profiles')
-      .select('role')
-      .eq('id', user.id)
-      .maybeSingle()
-
-    if (profile?.role !== 'admin') {
-      return NextResponse.json(
-        { success: false, error: 'Forbidden: Chỉ Ban Tổ Chức (Admin) mới có quyền chỉnh sửa đồng hồ.' },
-        { status: 403 }
-      )
-    }
-
-    // 2. Parse request body
-    const body = await req.json()
-    const { phaseId, title, targetDate, milestone = 'close', label } = body
-
-    if (!title || !title.trim()) {
-      return NextResponse.json(
-        { success: false, error: 'Tên vòng thi không được để trống.' },
-        { status: 400 }
-      )
-    }
-
-    if (!targetDate) {
-      return NextResponse.json(
-        { success: false, error: 'Ngày và giờ đếm ngược không được để trống.' },
-        { status: 400 }
-      )
-    }
-
-    const isoString = new Date(targetDate).toISOString()
-    const dateOnly = targetDate.slice(0, 10)
-    const trimmedTitle = title.trim()
-
-    // 3. Update Supabase using Service Role Client (bypasses RLS guaranteed!)
-    const serviceClient = createSupabaseServiceClient()
-
-    if (phaseId) {
-      const updateData: Record<string, any> = {
-        title: trimmedTitle,
-        updated_at: new Date().toISOString(),
-      }
-
-      if (milestone === 'open') {
-        updateData.submission_opens_at = isoString
-        updateData.start_date = dateOnly
-      } else {
-        // 'close' or 'custom'
-        updateData.submission_closes_at = isoString
-        updateData.end_date = dateOnly
-      }
-
-      const { error: phaseError } = await serviceClient
-        .from('competition_phases')
-        .update(updateData)
-        .eq('id', phaseId)
-
-      if (phaseError) {
-        console.error('Error updating competition_phases:', phaseError)
-      }
-    }
-
-    // Also update competitions table for cross-platform alignment
-    try {
-      const compUpdate: Record<string, any> = {}
-      if (milestone === 'open') {
-        compUpdate.submission_start = isoString
-      } else {
-        compUpdate.submission_end = isoString
-        compUpdate.registration_end = isoString
-      }
-      await serviceClient
-        .from('competitions')
-        .update(compUpdate)
-        .not('id', 'is', null)
-    } catch (compErr) {
-      console.error('Error syncing competition:', compErr)
-    }
-
-    // 4. Save to persistent file data/countdown_config.json
-    const newConfig: CountdownConfig = {
-      phaseId: phaseId || null,
-      phaseTitle: trimmedTitle,
-      targetDate: isoString,
-      label: label || (milestone === 'open' ? 'Đếm ngược mở đơn' : 'Đếm ngược đóng cổng nộp bài'),
-      milestone: milestone,
-      updatedAt: new Date().toISOString(),
-    }
-
-    writeConfigFile(newConfig)
-
-    return NextResponse.json({
-      success: true,
-      message: 'Cập nhật đồng hồ đếm ngược thành công và đã lưu vĩnh viễn!',
-      config: newConfig,
-    })
-  } catch (error: any) {
-    console.error('POST /api/countdown error:', error)
-    return NextResponse.json(
-      { success: false, error: error.message || 'Lỗi xử lý lưu đồng hồ đếm ngược' },
-      { status: 500 }
-    )
-  }
+  return NextResponse.json(
+    {
+      success: false,
+      error: 'Tính năng chỉnh sửa đồng hồ từ giao diện admin đã bị vô hiệu hóa. Cài đặt được quản lý trực tiếp qua code.',
+    },
+    { status: 403 }
+  )
 }
