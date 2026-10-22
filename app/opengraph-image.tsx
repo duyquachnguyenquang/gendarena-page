@@ -1,6 +1,6 @@
 import { ImageResponse } from 'next/og'
 
-export const runtime = 'edge'
+export const runtime = 'nodejs'
 
 export const alt = 'GenD Arena 2026 — Đấu Trường Khởi Nghiệp Công Nghệ'
 export const size = {
