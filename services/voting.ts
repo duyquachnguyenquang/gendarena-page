@@ -206,6 +206,7 @@ export async function getVotingTeams(limit = 10): Promise<TeamVote[]> {
 
       const isVotingDisabled = Boolean(curated?.votingDisabled || NON_VOTING_TEAM_IDS.includes(team.id))
       const eventistaUrl = isVotingDisabled ? '' : (curated?.eventistaUrl || EVENTISTA_VOTING_URL)
+      const directVoteUrl = isVotingDisabled ? undefined : curated?.directVoteUrl
 
       return {
         id: team.id,
@@ -228,6 +229,7 @@ export async function getVotingTeams(limit = 10): Promise<TeamVote[]> {
         videoPitchUrl: isVotingDisabled ? undefined : curated?.videoPitchUrl,
         videoDuration: isVotingDisabled ? undefined : curated?.videoDuration,
         eventistaUrl,
+        directVoteUrl,
         votingDisabled: isVotingDisabled,
         initialVotes: isVotingDisabled ? undefined : (curated?.initialVotes || (1200 + (selectedTeams.length - index) * 115)),
         likesCount: isVotingDisabled ? undefined : (curated?.likesCount || (200 + (selectedTeams.length - index) * 35)),

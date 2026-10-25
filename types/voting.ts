@@ -26,6 +26,7 @@ export interface TeamVote {
   videoPitchUrl?: string // Optional embed URL
   videoDuration?: string
   eventistaUrl: string // Link cổng bình chọn Eventista (1Vote)
+  directVoteUrl?: string // Link mở trực tiếp pop-up vote trên 1Vote
   votingDisabled?: boolean // Ẩn phần bình chọn nếu đội không đủ điều kiện video
   initialVotes?: number
   viewsCount?: number

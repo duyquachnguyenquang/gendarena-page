@@ -85,11 +85,21 @@ export async function GET() {
       totalVotes += votes
 
       if (teamId) {
+        const slug = c.name
+          .normalize('NFD')
+          .replace(/[\u0300-\u036f]/g, '')
+          .replace(/[đĐ]/g, 'd')
+          .toLowerCase()
+          .replace(/[^a-z0-9]+/g, '-')
+          .replace(/^-|-$/g, '')
+
         votesByTeamId[teamId] = {
           votes,
           rank,
           oneVoteId: c.id,
           name: c.name,
+          candidateUrl: `https://gendarena.1vote.vn/candidate/EVENT_qwCuZ/${slug}-${c.id}`,
+          directVoteUrl: `https://gendarena.1vote.vn/?voteEventId=EVENT_qwCuZ&voteCandidateId=${c.id}`,
         }
       }
     })
