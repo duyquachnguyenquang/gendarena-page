@@ -1,10 +1,17 @@
 'use client'
 
+import { usePathname } from 'next/navigation'
 import { siteConfig } from '@/config/site'
 
 const FACEBOOK_URL = siteConfig.socials?.facebook || 'https://www.facebook.com/gend.arena'
 
 export default function FacebookBubble() {
+  const pathname = usePathname()
+
+  if (pathname?.startsWith('/foh')) {
+    return null
+  }
+
   return (
     <aside
       aria-label="Liên hệ Fanpage"

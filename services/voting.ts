@@ -1,5 +1,5 @@
 import { createSupabaseServiceClient } from '@/lib/supabaseServer'
-import { VOTING_CONFIG, PINNED_FINALIST_TEAM_IDS, DISPLAY_NAMES_BY_ID } from '@/config/voting'
+import { VOTING_CONFIG, PINNED_FINALIST_TEAM_IDS, DISPLAY_NAMES_BY_ID, NON_VOTING_TEAM_IDS, EVENTISTA_VOTING_URL } from '@/config/voting'
 import type { TeamVote, TeamMember } from '@/types/voting'
 
 // Curated high-resolution 4:5 portrait posters tailored by category
@@ -204,9 +204,8 @@ export async function getVotingTeams(limit = 10): Promise<TeamVote[]> {
       const problem = curated?.problem || `Thách thức lớn về tối ưu hóa và năng lực cạnh tranh mà cộng đồng trong ngành ${topic} đang đối mặt.`
       const solution = curated?.solution || `Ứng dụng giải pháp công nghệ số và mô hình thực chiến nhằm nâng cao hiệu suất và giải quyết triệt để vấn đề.`
 
-      const eventistaUrl = curated?.eventistaUrl || `https://eventistax.com/vi/vote/gendarena-round3?msbc=${msbc}&team=${encodeURIComponent(
-        cleanName
-      )}&utm_source=gendarena_website&utm_medium=referral&utm_campaign=vote_round3`
+      const isVotingDisabled = Boolean(curated?.votingDisabled || NON_VOTING_TEAM_IDS.includes(team.id))
+      const eventistaUrl = isVotingDisabled ? '' : (curated?.eventistaUrl || EVENTISTA_VOTING_URL)
 
       return {
         id: team.id,
@@ -226,12 +225,13 @@ export async function getVotingTeams(limit = 10): Promise<TeamVote[]> {
         members: finalMembers,
         avatarUrl: curated?.avatarUrl || posterUrl,
         posterUrl,
-        videoPitchUrl: curated?.videoPitchUrl || 'https://www.youtube-nocookie.com/embed/L_LUpnjgPso',
-        videoDuration: curated?.videoDuration || '01:30',
+        videoPitchUrl: isVotingDisabled ? undefined : curated?.videoPitchUrl,
+        videoDuration: isVotingDisabled ? undefined : curated?.videoDuration,
         eventistaUrl,
-        initialVotes: curated?.initialVotes || (1200 + (selectedTeams.length - index) * 115),
-        likesCount: curated?.likesCount || (200 + (selectedTeams.length - index) * 35),
-        viewsCount: curated?.viewsCount || (2500 + (selectedTeams.length - index) * 280),
+        votingDisabled: isVotingDisabled,
+        initialVotes: isVotingDisabled ? undefined : (curated?.initialVotes || (1200 + (selectedTeams.length - index) * 115)),
+        likesCount: isVotingDisabled ? undefined : (curated?.likesCount || (200 + (selectedTeams.length - index) * 35)),
+        viewsCount: isVotingDisabled ? undefined : (curated?.viewsCount || (2500 + (selectedTeams.length - index) * 280)),
       }
     })
 

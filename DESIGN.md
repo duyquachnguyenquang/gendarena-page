@@ -295,6 +295,13 @@ Page header → first section: 48–64px gap
 ### Reduce Motion
 Always respect `prefers-reduced-motion`. Critical transitions should still happen (0ms), purely decorative ones should skip entirely.
 
+### Tactile High-Intent CTA Motion (Micro-Interactions)
+Các nút hành động quan trọng (như "Vote ngay", "Đăng ký tham gia", "Gửi dự án") và các nút icon chức năng phải có micro-animation tạo cảm giác phản hồi xúc giác (tactile feedback) sống động:
+- **Hover:** Lift nhẹ (`hover:-translate-y-0.5`), vầng sáng cyan glow tinh tế (`hover:shadow-[0_0_18px_rgba(0,212,255,0.4)]`), icon chuyển động định hướng (`group-hover:translate-x-0.5 group-hover:-translate-y-0.5`), hiệu ứng ánh kim trượt nhẹ (`shimmer sweep`).
+- **Active / Press:** Phản hồi nhấn xuống dứt khoát (`active:translate-y-0 active:scale-[0.98]`).
+- **Icon Actions (Info, Heart, Share):** Hover scale nhẹ (`hover:scale-110 active:scale-95`), viền sáng highlight tinh gọn.
+- **Border Radius:** Giữ bo góc tối giản, mạnh mẽ (`rounded-[4px]` đến `rounded-md`, khoảng 5–10%), dứt khoát, kiên quyết không dùng bo tròn bóng bẩy quá đà (`rounded-2xl`, `rounded-full`).
+
 ---
 
 ## 6. Anti-Slop Rules
@@ -309,10 +316,15 @@ Always respect `prefers-reduced-motion`. Critical transitions should still happe
 | 🚫 | **CẤM** className string >10 Tailwind utilities — dùng CVA hoặc extract component |
 | 🚫 | **CẤM** `shadow-xl` + `border` cùng lúc — chọn 1 (shadow hoặc border, không cả 2) |
 | 🚫 | **CẤM** animation trên mọi hover — chỉ animate khi có purpose rõ ràng |
+| 🚫 | **CẤM** nút bấm phẳng lì (flat / lifeless) thiếu tương tác cho các CTA chuyển đổi cao — phải có tactile micro-animation (lift, glow, press feedback) |
+| 🚫 | **CẤM** breadcrumbs thừa thãi trên các trang đơn mục đích (single-purpose landing/voting pages) khi context đã rõ ràng từ Header |
+| 🚫 | **CẤM** subtitle / phụ đề giải thích dài dòng lê thê bên dưới tiêu đề chính làm loãng trang ("Cổng bình chọn chính thức · Top 8 Đội Thi"...) |
+| 🚫 | **CẤM** để lộ nút điều khiển nội bộ / switcher / demo state (`Auto | Sắp | Mở | Đóng`) trên giao diện production dành cho người dùng |
+| 🚫 | **CẤM** bo tròn quá đà (`rounded-2xl`, `rounded-full`) trên card/nút công nghệ — chỉ bo nhẹ 5–10% (`rounded-[4px]` đến `rounded-md`) để giữ nét dứt khoát, mạnh mẽ |
 | 🚫 | **CẤM** `font-weight: 900` (extra-bold) — max `semibold` (600) cho UI, `bold` (700) cho display |
 | 🚫 | **CẤM** `letter-spacing: wide` trên body text — chỉ dùng cho labels/badges |
 | 🚫 | **CẤM** full-screen glow/neon effect — chỉ dùng glow ở accent element nhỏ, có chủ đích |
-| 🚫 | **CẤM** `animate-pulse` trên content đang hiển thị — chỉ dùng cho skeleton/loading |
+| 🚫 | **CẤM** `animate-pulse` trên content đang hiển thị — chỉ dùng cho skeleton/loading hoặc live status dot |
 | 🚫 | **CẤM** placeholder image (lorem picsum, gray box) trong production-facing UI |
 
 ---

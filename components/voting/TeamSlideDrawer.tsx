@@ -1,19 +1,15 @@
 'use client'
 
-import React, { useState, useEffect } from 'react'
+import React, { useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
   X,
-  Share2,
-  Check,
   ChevronLeft,
   ChevronRight,
   ArrowUpRight,
   Users,
-  ShieldCheck,
   GraduationCap,
-  Play,
-  Heart,
+  ExternalLink,
 } from 'lucide-react'
 import { TeamVote, VotingPhaseStatus } from '@/types/voting'
 import EventistaLogo from './EventistaLogo'
@@ -22,21 +18,23 @@ interface TeamSlideDrawerProps {
   team: TeamVote | null
   teams: TeamVote[]
   status: VotingPhaseStatus
+  liveVote?: { votes: number; rank: number }
   isOpen: boolean
   onClose: () => void
   onSelectTeam: (team: TeamVote) => void
+  onOpenGuide?: () => void
 }
 
 export default function TeamSlideDrawer({
   team,
   teams,
   status,
+  liveVote,
   isOpen,
   onClose,
   onSelectTeam,
+  onOpenGuide,
 }: TeamSlideDrawerProps) {
-  const [copied, setCopied] = useState(false)
-
   const currentIndex = team ? teams.findIndex((t) => t.id === team.id) : -1
   const prevTeam = currentIndex > 0 ? teams[currentIndex - 1] : teams[teams.length - 1]
   const nextTeam = currentIndex < teams.length - 1 ? teams[currentIndex + 1] : teams[0]
@@ -54,84 +52,66 @@ export default function TeamSlideDrawer({
 
   if (!isOpen || !team) return null
 
-  const isVotingActive = status === 'ACTIVE'
-  const isUpcoming = status === 'UPCOMING'
-  const isEnded = status === 'ENDED'
-
-  const handleCopyLink = () => {
-    const url = `${window.location.origin}/vote?team=${team.id}`
-    navigator.clipboard.writeText(url)
-    setCopied(true)
-    setTimeout(() => setCopied(false), 2000)
-  }
-
   return (
     <AnimatePresence>
-      <div className="fixed inset-0 z-50 overflow-hidden">
+      <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 overflow-y-auto">
         {/* Backdrop */}
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           onClick={onClose}
-          className="fixed inset-0 bg-black/60 backdrop-blur-sm transition-opacity"
+          className="fixed inset-0 bg-black/80 backdrop-blur-sm cursor-pointer"
         />
 
-        {/* Right Slide-in Drawer */}
-        <motion.aside
-          initial={{ x: '100%' }}
-          animate={{ x: 0 }}
-          exit={{ x: '100%' }}
-          transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
-          className="fixed inset-y-0 right-0 w-full sm:max-w-xl md:max-w-2xl bg-surface-raised border-l border-surface-border shadow-2xl flex flex-col z-50"
+        {/* ── Centered Pop-up Window (thay thế Slide-drawer dài lê thê) ── */}
+        <motion.div
+          initial={{ opacity: 0, scale: 0.96, y: 12 }}
+          animate={{ opacity: 1, scale: 1, y: 0 }}
+          exit={{ opacity: 0, scale: 0.96, y: 12 }}
+          transition={{ duration: 0.2, ease: 'easeOut' }}
+          className="relative z-50 w-full max-w-lg bg-surface-overlay border border-surface-border rounded-xl shadow-2xl overflow-hidden flex flex-col my-auto max-h-[92vh]"
         >
-          {/* ─── Top Header ─── */}
-          <div className="flex items-center justify-between px-5 py-3.5 border-b border-surface-border bg-surface-raised">
-            <div className="flex items-center gap-2.5">
-              <span className="font-mono text-xs font-semibold px-2 py-0.5 rounded-[3px] bg-surface-overlay border border-surface-border text-brand-cyan">
+          {/* ── Top Bar ── */}
+          <div className="flex items-center justify-between px-4 py-3 border-b border-surface-border bg-surface-raised shrink-0">
+            <div className="flex items-center gap-2">
+              <span className="font-mono text-xs font-bold px-2 py-0.5 rounded-[3px] bg-brand-cyan/15 text-brand-cyan border border-brand-cyan/30">
                 {team.msbc}
               </span>
-              <span className="text-xs font-mono text-text-tertiary">
-                {currentIndex + 1} / {teams.length}
+              <span className="text-[11px] font-mono text-text-tertiary">
+                {team.category}
               </span>
             </div>
 
-            <div className="flex items-center gap-2">
-              {/* Prev / Next */}
-              <button
-                type="button"
-                onClick={() => onSelectTeam(prevTeam)}
-                className="size-7 rounded-[4px] flex items-center justify-center text-text-tertiary hover:text-text-primary hover:bg-surface-elevated transition-colors"
-                title="Đội trước (←)"
-              >
-                <ChevronLeft className="size-4" />
-              </button>
-              <button
-                type="button"
-                onClick={() => onSelectTeam(nextTeam)}
-                className="size-7 rounded-[4px] flex items-center justify-center text-text-tertiary hover:text-text-primary hover:bg-surface-elevated transition-colors"
-                title="Đội tiếp theo (→)"
-              >
-                <ChevronRight className="size-4" />
-              </button>
+            <div className="flex items-center gap-1.5">
+              {/* Prev / Next buttons */}
+              {teams.length > 1 && (
+                <>
+                  <button
+                    type="button"
+                    onClick={() => onSelectTeam(prevTeam)}
+                    className="size-7 rounded-[4px] flex items-center justify-center text-text-tertiary hover:text-text-primary hover:bg-surface-elevated transition-colors cursor-pointer"
+                    title="Đội trước (←)"
+                  >
+                    <ChevronLeft className="size-4" />
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => onSelectTeam(nextTeam)}
+                    className="size-7 rounded-[4px] flex items-center justify-center text-text-tertiary hover:text-text-primary hover:bg-surface-elevated transition-colors cursor-pointer"
+                    title="Đội tiếp theo (→)"
+                  >
+                    <ChevronRight className="size-4" />
+                  </button>
+                  <div className="w-px h-3.5 bg-surface-border mx-1" />
+                </>
+              )}
 
-              <div className="w-px h-3.5 bg-surface-border mx-1" />
-
-              {/* Share */}
-              <button
-                type="button"
-                onClick={handleCopyLink}
-                className="size-7 rounded-[4px] flex items-center justify-center text-text-tertiary hover:text-text-primary hover:bg-surface-elevated transition-colors"
-                title="Sao chép link đội thi"
-              >
-                {copied ? <Check className="size-3.5 text-semantic-success" /> : <Share2 className="size-3.5" />}
-              </button>
-
-              {/* Close */}
+              {/* Close button */}
               <button
                 type="button"
                 onClick={onClose}
-                className="size-7 rounded-[4px] flex items-center justify-center text-text-tertiary hover:text-text-primary hover:bg-surface-elevated transition-colors"
+                className="size-7 rounded-[4px] flex items-center justify-center text-text-tertiary hover:text-text-primary hover:bg-surface-elevated transition-colors cursor-pointer"
                 title="Đóng (Esc)"
               >
                 <X className="size-4" />
@@ -139,144 +119,71 @@ export default function TeamSlideDrawer({
             </div>
           </div>
 
-          {/* ─── Scrollable Body ─── */}
-          <div className="flex-1 overflow-y-auto px-5 py-5 space-y-5">
-            {/* 1. Team Poster Banner */}
-            <div className="space-y-1.5">
-              <div className="relative aspect-video w-full rounded-[4px] overflow-hidden bg-surface-base border border-surface-border">
-                <img
-                  src={team.posterUrl || team.avatarUrl}
-                  alt={team.name}
-                  className="size-full object-cover"
-                />
-              </div>
-              <div className="flex items-center justify-between text-[11px] text-text-tertiary font-mono">
-                <span>{team.category}</span>
-                <span>MSBC: #{team.msbc}</span>
-              </div>
+          {/* ── Scrollable Body: Chỉ giữ hình ảnh, tên đội, đơn vị, thành viên, và nút vote ── */}
+          <div className="flex-1 overflow-y-auto p-4 sm:p-5 space-y-4">
+            {/* 1. Hình ảnh đội thi nổi bật */}
+            <div className="relative aspect-[16/10] w-full rounded-lg overflow-hidden bg-surface-base border border-surface-border shadow-md">
+              <img
+                src={team.avatarUrl || team.posterUrl}
+                alt={team.name}
+                className="size-full object-cover"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent pointer-events-none" />
+
+              {/* Live Vote Badge góc ảnh */}
+              {liveVote !== undefined && (
+                <div className="absolute bottom-2.5 left-2.5">
+                  <span className="inline-flex items-center gap-1 font-mono text-[11px] font-semibold text-brand-cyan bg-black/85 border border-brand-cyan/40 px-2 py-0.5 rounded-[3px] select-none backdrop-blur-sm shadow-[0_0_12px_rgba(0,212,255,0.2)]">
+                    <span className="size-1.5 rounded-full bg-brand-cyan animate-pulse" />
+                    <span>{liveVote.votes.toLocaleString()} vote</span>
+                    {liveVote.rank > 0 && (
+                      <span className="text-text-tertiary pl-1 border-l border-white/20">
+                        #{liveVote.rank}
+                      </span>
+                    )}
+                  </span>
+                </div>
+              )}
             </div>
 
-            {/* 2. Team Name & Quote */}
-            <div className="space-y-2">
-              <h2 className="text-xl sm:text-2xl font-bold text-text-primary tracking-tight">
+            {/* 2. Tên đội thi & Đơn vị (Trường Đại học) — Không có đoạn văn AI */}
+            <div className="space-y-1.5">
+              <h2 className="text-2xl sm:text-3xl font-bold text-text-primary tracking-tight">
                 {team.name}
               </h2>
 
-              <p className="text-sm italic text-text-secondary leading-relaxed border-l-2 border-brand-cyan/50 pl-3 py-0.5">
-                "{team.quote}"
-              </p>
-
-              <div className="flex items-center gap-1.5 text-xs text-text-tertiary">
-                <GraduationCap className="size-3.5" />
+              <div className="flex items-center gap-1.5 text-xs text-text-secondary font-mono">
+                <GraduationCap className="size-4 text-brand-cyan shrink-0" />
                 <span>{team.institution}</span>
               </div>
             </div>
 
-            {/* 3. Primary CTA Section */}
-            <div className="p-4 rounded-[4px] bg-surface-overlay border border-surface-border space-y-2.5">
-              <div className="flex items-center justify-between text-[11px] text-text-tertiary">
-                <span className="uppercase tracking-wide font-semibold">Bình chọn Vòng 3</span>
-                <a
-                  href="https://eventistax.com/vi/"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex items-center gap-1.5 hover:opacity-85 transition-opacity"
-                  title="Eventista — Nền tảng bảo trợ & vận hành cổng bình chọn trực tuyến"
-                >
-                  <img src="/logo/eventista-badge.png" alt="Eventista" className="size-3.5 rounded-[2px] object-contain" />
-                  <span className="font-semibold text-text-secondary hover:text-text-primary">Eventista</span>
-                </a>
-              </div>
-
-              {isVotingActive && (
-                <a
-                  href={team.eventistaUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="block w-full"
-                >
-                  <button
-                    type="button"
-                    className="w-full py-3 px-4 rounded-[4px] bg-brand-cyan text-surface-base font-bold text-sm uppercase tracking-wide hover:bg-brand-cyanBright transition-colors flex items-center justify-center gap-2"
-                  >
-                    <span>Vote ngay</span>
-                    <ArrowUpRight className="size-4" />
-                  </button>
-                </a>
-              )}
-
-              {isUpcoming && (
-                <button
-                  type="button"
-                  disabled
-                  className="w-full py-2.5 px-4 rounded-[4px] border border-surface-border text-text-disabled text-xs uppercase tracking-wide cursor-not-allowed text-center"
-                >
-                  Mở lúc 20:00 · 25.10.2026
-                </button>
-              )}
-
-              {isEnded && (
-                <button
-                  type="button"
-                  disabled
-                  className="w-full py-2.5 px-4 rounded-[4px] border border-surface-border text-text-disabled text-xs uppercase tracking-wide cursor-not-allowed text-center"
-                >
-                  Đã đóng · 23:59 · 02.11.2026
-                </button>
-              )}
-
-              <p className="text-[10px] text-text-tertiary text-center">
-                1 tài khoản hợp lệ = 1 lượt vote miễn phí.
-              </p>
-            </div>
-
-            {/* 4. Problem & Solution */}
-            <div className="space-y-3">
-              <h3 className="text-[11px] uppercase tracking-widest text-text-tertiary font-semibold">
-                Thuyết Trình Dự Án
-              </h3>
-
-              <div className="space-y-2">
-                <div className="p-3.5 rounded-[4px] bg-surface-overlay border border-surface-border space-y-1">
-                  <span className="text-[10px] font-mono uppercase text-text-tertiary font-semibold block tracking-wider">
-                    Bài toán
-                  </span>
-                  <p className="text-xs text-text-secondary leading-relaxed">
-                    {team.problem}
-                  </p>
-                </div>
-
-                <div className="p-3.5 rounded-[4px] bg-surface-overlay border border-surface-border space-y-1">
-                  <span className="text-[10px] font-mono uppercase text-brand-cyan font-semibold block tracking-wider">
-                    Giải pháp
-                  </span>
-                  <p className="text-xs text-text-secondary leading-relaxed">
-                    {team.solution}
-                  </p>
-                </div>
-              </div>
-            </div>
-
-            {/* 5. Members */}
-            <div className="space-y-2.5">
-              <h3 className="text-[11px] uppercase tracking-widest text-text-tertiary font-semibold flex items-center gap-1.5">
-                <Users className="size-3" />
-                <span>Thành Viên ({team.members.length})</span>
+            {/* 3. Danh sách Thành viên (Tên, vai trò, đơn vị) */}
+            <div className="space-y-2 pt-1 border-t border-surface-border/60">
+              <h3 className="text-xs uppercase tracking-wider text-text-tertiary font-semibold flex items-center gap-1.5 font-mono">
+                <Users className="size-3.5 text-brand-cyan" />
+                <span>Thành viên đội thi ({team.members.length})</span>
               </h3>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                 {team.members.map((member, idx) => (
                   <div
                     key={idx}
-                    className="p-3 rounded-[4px] bg-surface-overlay border border-surface-border flex items-center gap-2.5"
+                    className="p-2.5 rounded-[4px] bg-surface-raised border border-surface-border flex items-center gap-2.5"
                   >
-                    <div className="size-7 rounded-[3px] bg-surface-raised border border-surface-border flex items-center justify-center font-mono font-semibold text-[11px] text-brand-cyan shrink-0">
+                    <div className="size-8 rounded-[4px] bg-surface-elevated border border-brand-cyan/25 flex items-center justify-center font-mono font-bold text-xs text-brand-cyan shrink-0">
                       {member.name.split(' ').slice(-1)[0]?.charAt(0) || 'M'}
                     </div>
-                    <div className="min-w-0">
-                      <p className="text-xs font-medium text-text-primary truncate">{member.name}</p>
-                      <p className="text-[10px] text-brand-cyan truncate">{member.role}</p>
-                      <p className="text-[10px] text-text-tertiary truncate">{member.university}</p>
+                    <div className="min-w-0 flex-1">
+                      <p className="text-xs font-semibold text-text-primary truncate">
+                        {member.name}
+                      </p>
+                      <p className="text-[10px] text-brand-cyan font-mono truncate">
+                        {member.role}
+                      </p>
+                      <p className="text-[10px] text-text-tertiary truncate">
+                        {member.university}
+                      </p>
                     </div>
                   </div>
                 ))}
@@ -284,31 +191,35 @@ export default function TeamSlideDrawer({
             </div>
           </div>
 
-          {/* ─── Footer Bar ─── */}
-          <div className="px-5 py-3 border-t border-surface-border bg-surface-raised flex items-center justify-between text-xs text-text-tertiary">
-            <button
-              type="button"
-              onClick={() => onSelectTeam(prevTeam)}
-              className="hover:text-text-primary transition-colors flex items-center gap-1"
-              title="Đội trước"
-            >
-              <ChevronLeft className="size-3.5" />
-              <span className="font-mono">{prevTeam.msbc}</span>
-            </button>
+          {/* ── Footer CTA: Nút chuyển hướng sang Eventista Vote ── */}
+          {!team.votingDisabled && (
+            <div className="p-4 border-t border-surface-border bg-surface-raised space-y-2 shrink-0">
+              <a
+                href={team.eventistaUrl || 'https://gendarena.1vote.vn/'}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="block w-full"
+              >
+                <button
+                  type="button"
+                  className="group/btn relative w-full py-3 px-4 rounded-[4px] bg-brand-cyan text-surface-base font-bold text-sm uppercase tracking-wide overflow-hidden transition-all duration-200 hover:bg-brand-cyanBright hover:shadow-[0_0_24px_rgba(0,212,255,0.45)] hover:-translate-y-0.5 active:translate-y-0 active:scale-[0.98] flex items-center justify-center gap-2 cursor-pointer"
+                >
+                  <span className="absolute inset-0 -translate-x-full group-hover/btn:translate-x-full duration-700 bg-gradient-to-r from-transparent via-white/30 to-transparent transition-transform ease-out pointer-events-none" />
+                  <span className="relative z-10">Bình chọn cho {team.name} trên Eventista</span>
+                  <ArrowUpRight className="relative z-10 size-4 transition-transform duration-200 group-hover/btn:translate-x-0.5 group-hover/btn:-translate-y-0.5" />
+                </button>
+              </a>
 
-            <EventistaLogo className="h-4" withLink />
-
-            <button
-              type="button"
-              onClick={() => onSelectTeam(nextTeam)}
-              className="hover:text-text-primary transition-colors flex items-center gap-1"
-              title="Đội tiếp theo"
-            >
-              <span className="font-mono">{nextTeam.msbc}</span>
-              <ChevronRight className="size-3.5" />
-            </button>
-          </div>
-        </motion.aside>
+              <div className="flex items-center justify-between text-[10px] text-text-tertiary font-mono pt-0.5">
+                <span>1 tài khoản = 1 lượt vote miễn phí</span>
+                <div className="flex items-center gap-1.5">
+                  <span>Bảo trợ:</span>
+                  <EventistaLogo className="h-3.5" withLink />
+                </div>
+              </div>
+            </div>
+          )}
+        </motion.div>
       </div>
     </AnimatePresence>
   )

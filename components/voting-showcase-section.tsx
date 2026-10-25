@@ -126,27 +126,22 @@ export default function VotingShowcaseSection() {
 
                   </div>
 
-                  {/* Team Title */}
-                  <CardTitle className="text-lg md:text-xl font-semibold text-text-primary group-hover:text-brand-cyan transition-colors mb-1.5 leading-snug">
+                  {/* Team Title - Prominent */}
+                  <CardTitle className="text-xl sm:text-2xl font-bold text-text-primary group-hover:text-brand-cyan transition-colors mb-1.5 leading-snug">
                     {team.name}
                   </CardTitle>
 
                   {/* Institution with icon */}
-                  <div className="flex items-center gap-1.5 text-xs text-text-tertiary mb-3 font-mono">
+                  <div className="flex items-center gap-1.5 text-xs text-text-tertiary font-mono">
                     <GraduationCap className="size-3.5 text-brand-cyan/70 shrink-0" />
                     <span className="truncate">{team.institution}</span>
                   </div>
-
-                  {/* Slogan / Quote */}
-                  <CardDescription className="text-text-secondary text-sm leading-relaxed line-clamp-2 mt-0">
-                    &ldquo;{team.quote}&rdquo;
-                  </CardDescription>
                 </div>
 
                 {/* Card Action Footer */}
-                <div className="relative z-10 mt-5 pt-3.5 border-t border-surface-border flex items-center justify-between text-xs font-medium text-brand-cyan group-hover:text-brand-cyanBright transition-colors">
-                  <span>Khám phá đề án &amp; chi tiết</span>
-                  <ArrowRight className="size-4 transition-transform group-hover:translate-x-1" />
+                <div className="relative z-10 mt-5 pt-3.5 border-t border-surface-border flex items-center justify-between text-xs font-semibold text-brand-cyan group-hover:text-brand-cyanBright transition-colors uppercase tracking-wider">
+                  <span>Chi tiết đội thi &amp; Vote</span>
+                  <ArrowUpRight className="size-4 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
                 </div>
               </Card>
             </Link>

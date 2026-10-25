@@ -17,6 +17,7 @@ export default function AuthStateListener() {
   const pathname = usePathname()
 
   useEffect(() => {
+    if (pathname?.startsWith('/foh')) return
     const supabase = createClient()
 
     const {

@@ -56,39 +56,15 @@ export default function MobileStickyBottomBar({
             <Info className="size-3.5" />
           </Button>
 
-          {isVotingActive && (
+          {!currentTeam.votingDisabled && (
             <Button
               variant="primary"
               size="sm"
               onClick={() => onVoteDirect(currentTeam)}
-              className="h-8 px-3 text-xs font-bold uppercase tracking-wide gap-1 rounded-[4px]"
+              className="group/btn relative overflow-hidden h-8 px-3 text-xs font-bold uppercase tracking-wide gap-1 rounded-[4px] hover:shadow-[0_0_15px_rgba(0,212,255,0.4)] hover:-translate-y-0.5 active:translate-y-0 active:scale-[0.98] transition-all duration-150 cursor-pointer"
             >
-              <span>Vote ngay</span>
-              <ArrowUpRight className="size-3.5" />
-            </Button>
-          )}
-
-          {isUpcoming && (
-            <Button
-              variant="secondary"
-              size="sm"
-              disabled
-              className="h-8 px-2.5 text-[11px] text-text-disabled rounded-[4px]"
-            >
-              <Clock className="size-3 text-semantic-warning mr-1" />
-              <span>Chưa mở</span>
-            </Button>
-          )}
-
-          {isEnded && (
-            <Button
-              variant="secondary"
-              size="sm"
-              disabled
-              className="h-8 px-2.5 text-[11px] text-text-disabled rounded-[4px]"
-            >
-              <Lock className="size-3 text-text-tertiary mr-1" />
-              <span>Đã đóng</span>
+              <span className="relative z-10">Vote ngay</span>
+              <ArrowUpRight className="relative z-10 size-3.5 transition-transform duration-150 group-hover/btn:translate-x-0.5 group-hover/btn:-translate-y-0.5" />
             </Button>
           )}
         </div>

@@ -25,7 +25,8 @@ export interface TeamVote {
   posterUrl: string
   videoPitchUrl?: string // Optional embed URL
   videoDuration?: string
-  eventistaUrl: string // Placeholder for Eventista with UTM params
+  eventistaUrl: string // Link cổng bình chọn Eventista (1Vote)
+  votingDisabled?: boolean // Ẩn phần bình chọn nếu đội không đủ điều kiện video
   initialVotes?: number
   viewsCount?: number
   likesCount?: number

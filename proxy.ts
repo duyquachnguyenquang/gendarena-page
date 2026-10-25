@@ -5,12 +5,13 @@ import { getPostLoginPath } from '@/lib/auth/routing'
 export async function proxy(request: NextRequest) {
   const pathname = request.nextUrl.pathname
 
-  // Fast-path bypass for high-concurrency public voting pages & APIs
-  // Prevents redundant Supabase Auth roundtrips during peak QR scan spikes
+  // Fast-path bypass for high-concurrency public voting pages, APIs & offline FOH scoreboard
+  // Prevents redundant Supabase Auth roundtrips during peak QR scan spikes or offline FOH operation
   if (
     pathname.startsWith('/vote') ||
     pathname.startsWith('/binh-chon') ||
-    pathname.startsWith('/api/booth-vote')
+    pathname.startsWith('/api/booth-vote') ||
+    pathname.startsWith('/foh')
   ) {
     return NextResponse.next()
   }

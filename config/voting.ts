@@ -39,6 +39,14 @@ export const DISPLAY_NAMES_BY_ID: Record<string, string> = {
   '9e9103e9-a725-48cf-b4da-519f0b68e24a': 'Aqua Radar',
 }
 
+export const EVENTISTA_VOTING_URL = 'https://gendarena.1vote.vn/'
+
+// Các đội không có phần bình chọn do không có video thực hiện đúng yêu cầu
+export const NON_VOTING_TEAM_IDS: string[] = [
+  'd9f575a6-e2d6-42e6-bd4a-4f076dfa7f0e', // SISO
+  '9e9103e9-a725-48cf-b4da-519f0b68e24a', // Aqua Radar
+]
+
 export const VOTING_CONFIG: VotingConfig = {
   title: 'Bình Chọn Vòng 3',
   roundTitle: 'Vòng 3: Chung Kết',
@@ -82,7 +90,7 @@ export const VOTING_CONFIG: VotingConfig = {
     {
       title: 'Giải thưởng Đội thi Được Yêu Thích Nhất',
       content: [
-        'Đội dẫn đầu bình chọn nhận giải thưởng 15.000.000 VNĐ cùng cúp danh dự tại Đêm Chung kết.',
+        'Đội dẫn đầu bình chọn nhận giải thưởng 1.000.000 VNĐ cùng kỷ niệm chương tại Đêm Chung kết.',
         'Kết quả độc lập với điểm số chuyên môn từ Ban Giám khảo.',
       ],
     },
@@ -119,8 +127,7 @@ export const VOTING_CONFIG: VotingConfig = {
       posterUrl: '/images/teams/apex.webp',
       videoPitchUrl: 'https://drive.google.com/file/d/1i6rEcgvpSRkfo0Sc9-dy90umAvtucJCS/preview',
       videoDuration: '01:30',
-      eventistaUrl:
-        'https://eventistax.com/vi/vote/gendarena-round3?msbc=01&team=APEX&utm_source=gendarena_website&utm_medium=referral&utm_campaign=vote_round3',
+      eventistaUrl: 'https://gendarena.1vote.vn/',
       initialVotes: 1420,
       likesCount: 384,
       viewsCount: 3840,
@@ -152,8 +159,7 @@ export const VOTING_CONFIG: VotingConfig = {
       posterUrl: '/images/teams/change-yourself.webp',
       videoPitchUrl: 'https://drive.google.com/file/d/18udO8myLKy-sUBcbjzrmlc2gUrdHD9k6/preview',
       videoDuration: '01:45',
-      eventistaUrl:
-        'https://eventistax.com/vi/vote/gendarena-round3?msbc=02&team=Change%20yourself&utm_source=gendarena_website&utm_medium=referral&utm_campaign=vote_round3',
+      eventistaUrl: 'https://gendarena.1vote.vn/',
       initialVotes: 1680,
       likesCount: 512,
       viewsCount: 4210,
@@ -187,8 +193,7 @@ export const VOTING_CONFIG: VotingConfig = {
       posterUrl: '/images/teams/f4st.webp',
       videoPitchUrl: 'https://drive.google.com/file/d/1QHXcK0D_W095aoWfmynmE-wf2RA6VBtg/preview',
       videoDuration: '01:25',
-      eventistaUrl:
-        'https://eventistax.com/vi/vote/gendarena-round3?msbc=03&team=F4ST&utm_source=gendarena_website&utm_medium=referral&utm_campaign=vote_round3',
+      eventistaUrl: 'https://gendarena.1vote.vn/',
       initialVotes: 1350,
       likesCount: 429,
       viewsCount: 3120,
@@ -223,8 +228,7 @@ export const VOTING_CONFIG: VotingConfig = {
       posterUrl: '/images/teams/from-l-to-e.webp',
       videoPitchUrl: 'https://drive.google.com/file/d/1RUF1QB8htcKB0QTkk_ZwU8djq2bB8s3Q/preview',
       videoDuration: '01:40',
-      eventistaUrl:
-        'https://eventistax.com/vi/vote/gendarena-round3?msbc=04&team=From%20L%20to%20E&utm_source=gendarena_website&utm_medium=referral&utm_campaign=vote_round3',
+      eventistaUrl: 'https://gendarena.1vote.vn/',
       initialVotes: 1890,
       likesCount: 680,
       viewsCount: 5100,
@@ -259,8 +263,7 @@ export const VOTING_CONFIG: VotingConfig = {
       posterUrl: '/images/teams/ngu-long-cong-chua.webp',
       videoPitchUrl: 'https://drive.google.com/file/d/1zFBsS12HGv1X4L3zTLcDs4_NlL7MaBa2/preview',
       videoDuration: '01:35',
-      eventistaUrl:
-        'https://eventistax.com/vi/vote/gendarena-round3?msbc=05&team=Ngu%20Long%20Cong%20Chua&utm_source=gendarena_website&utm_medium=referral&utm_campaign=vote_round3',
+      eventistaUrl: 'https://gendarena.1vote.vn/',
       initialVotes: 1220,
       likesCount: 310,
       viewsCount: 2950,
@@ -292,13 +295,8 @@ export const VOTING_CONFIG: VotingConfig = {
       ],
       avatarUrl: '/images/teams/siso.webp',
       posterUrl: '/images/teams/siso.webp',
-      videoPitchUrl: 'https://drive.google.com/file/d/1QbmLLmRnU81KADJUNdl8LgMRJpyopelV/preview',
-      videoDuration: '01:30',
-      eventistaUrl:
-        'https://eventistax.com/vi/vote/gendarena-round3?msbc=06&team=SISO&utm_source=gendarena_website&utm_medium=referral&utm_campaign=vote_round3',
-      initialVotes: 1150,
-      likesCount: 295,
-      viewsCount: 2680,
+      eventistaUrl: '',
+      votingDisabled: true,
     },
     {
       id: 'e5e79a05-cc45-4015-811b-17d3965e32f2',
@@ -330,8 +328,7 @@ export const VOTING_CONFIG: VotingConfig = {
       posterUrl: '/images/teams/axiom.webp',
       videoPitchUrl: 'https://drive.google.com/file/d/1WpVMbTOS579rLIXp8APa_SMBoeOCvwy3/preview',
       videoDuration: '01:50',
-      eventistaUrl:
-        'https://eventistax.com/vi/vote/gendarena-round3?msbc=07&team=Axiom&utm_source=gendarena_website&utm_medium=referral&utm_campaign=vote_round3',
+      eventistaUrl: 'https://gendarena.1vote.vn/',
       initialVotes: 2140,
       likesCount: 890,
       viewsCount: 5600,
@@ -366,8 +363,7 @@ export const VOTING_CONFIG: VotingConfig = {
       posterUrl: '/images/teams/viet-nam-safe.webp',
       videoPitchUrl: 'https://drive.google.com/file/d/1xZ_gJuCq8lnjsOwP9lBSDBcnngYrXzzr/preview',
       videoDuration: '01:30',
-      eventistaUrl:
-        'https://eventistax.com/vi/vote/gendarena-round3?msbc=08&team=Viet%20Nam%20Safe&utm_source=gendarena_website&utm_medium=referral&utm_campaign=vote_round3',
+      eventistaUrl: 'https://gendarena.1vote.vn/',
       initialVotes: 980,
       likesCount: 260,
       viewsCount: 2430,
@@ -401,8 +397,7 @@ export const VOTING_CONFIG: VotingConfig = {
       posterUrl: '/images/teams/vnsn.webp',
       videoPitchUrl: 'https://drive.google.com/file/d/1DD4k9TaE9lQh5-wNrf0Rh4wGCjUankWX/preview',
       videoDuration: '01:20',
-      eventistaUrl:
-        'https://eventistax.com/vi/vote/gendarena-round3?msbc=09&team=VNSN&utm_source=gendarena_website&utm_medium=referral&utm_campaign=vote_round3',
+      eventistaUrl: 'https://gendarena.1vote.vn/',
       initialVotes: 1730,
       likesCount: 540,
       viewsCount: 4190,
@@ -431,13 +426,8 @@ export const VOTING_CONFIG: VotingConfig = {
       ],
       avatarUrl: '/images/teams/aqua-radar.webp',
       posterUrl: '/images/teams/aqua-radar.webp',
-      videoPitchUrl: 'https://www.youtube-nocookie.com/embed/kJQP7kiw5Fk',
-      videoDuration: '01:30',
-      eventistaUrl:
-        'https://eventistax.com/vi/vote/gendarena-round3?msbc=10&team=Aqua%20Radar&utm_source=gendarena_website&utm_medium=referral&utm_campaign=vote_round3',
-      initialVotes: 1560,
-      likesCount: 420,
-      viewsCount: 3650,
+      eventistaUrl: '',
+      votingDisabled: true,
     },
   ],
 }

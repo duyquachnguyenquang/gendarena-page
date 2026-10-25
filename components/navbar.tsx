@@ -42,8 +42,8 @@ export default function Navbar() {
   const supabase = useMemo(() => createClient(), [])
 
   useEffect(() => {
-    // Skip Supabase Auth roundtrips on public QR booth voting pages to maximize peak throughput
-    if (pathname.startsWith('/vote/booth')) {
+    // Skip Supabase Auth roundtrips on public QR booth voting pages and offline FOH pages
+    if (pathname.startsWith('/vote/booth') || pathname.startsWith('/foh')) {
       setLoading(false)
       return
     }
@@ -140,6 +140,10 @@ export default function Navbar() {
         ? 'text-brand-cyan bg-brand-cyan/10 font-semibold'
         : 'text-text-secondary hover:text-text-primary hover:bg-surface-raised'
     }`
+  }
+
+  if (pathname.startsWith('/foh')) {
+    return null
   }
 
   return (
