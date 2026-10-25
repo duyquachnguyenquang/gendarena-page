@@ -3,7 +3,6 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react'
 import Image from 'next/image'
 import { motion, AnimatePresence } from 'framer-motion'
-import DotGridBackground from '@/components/dot-grid-background'
 import {
   FOHState,
   FOHMessage,
@@ -30,32 +29,32 @@ import {
 function StageRankBadge({ rank, hasScore }: { rank: number; hasScore: boolean }) {
   if (rank === 1 && hasScore) {
     return (
-      <div className="w-24 py-2.5 rounded-lg bg-yellow-500/15 border border-yellow-400/60 flex flex-col items-center justify-center shrink-0">
-        <Trophy className="size-6 text-yellow-400" />
-        <span className="font-mono text-xs font-bold text-yellow-400 mt-1">HẠNG 1</span>
+      <div className="w-20 lg:w-24 py-2 rounded-lg bg-yellow-500/15 border border-yellow-400/60 flex flex-col items-center justify-center shrink-0 shadow-[0_0_12px_rgba(234,179,8,0.2)]">
+        <Trophy className="size-5 lg:size-6 text-yellow-400" />
+        <span className="font-mono text-[11px] lg:text-xs font-bold text-yellow-400 mt-0.5">HẠNG 1</span>
       </div>
     )
   }
   if (rank === 2 && hasScore) {
     return (
-      <div className="w-24 py-2.5 rounded-lg bg-slate-400/15 border border-slate-300/50 flex flex-col items-center justify-center shrink-0">
-        <Medal className="size-6 text-slate-300" />
-        <span className="font-mono text-xs font-bold text-slate-200 mt-1">HẠNG 2</span>
+      <div className="w-20 lg:w-24 py-2 rounded-lg bg-slate-400/15 border border-slate-300/50 flex flex-col items-center justify-center shrink-0 shadow-[0_0_10px_rgba(203,213,225,0.15)]">
+        <Medal className="size-5 lg:size-6 text-slate-300" />
+        <span className="font-mono text-[11px] lg:text-xs font-bold text-slate-200 mt-0.5">HẠNG 2</span>
       </div>
     )
   }
   if (rank === 3 && hasScore) {
     return (
-      <div className="w-24 py-2.5 rounded-lg bg-amber-500/15 border border-amber-500/50 flex flex-col items-center justify-center shrink-0">
-        <Medal className="size-6 text-amber-500" />
-        <span className="font-mono text-xs font-bold text-amber-400 mt-1">HẠNG 3</span>
+      <div className="w-20 lg:w-24 py-2 rounded-lg bg-amber-500/15 border border-amber-500/50 flex flex-col items-center justify-center shrink-0 shadow-[0_0_10px_rgba(245,158,11,0.15)]">
+        <Medal className="size-5 lg:size-6 text-amber-500" />
+        <span className="font-mono text-[11px] lg:text-xs font-bold text-amber-400 mt-0.5">HẠNG 3</span>
       </div>
     )
   }
   return (
-    <div className="w-24 py-2.5 rounded-lg bg-surface-overlay border border-surface-border flex flex-col items-center justify-center shrink-0">
-      <span className="font-mono text-xl font-bold text-text-secondary">#{rank}</span>
-      <span className="font-mono text-[10px] text-text-tertiary uppercase mt-0.5">HẠNG</span>
+    <div className="w-20 lg:w-24 py-2 rounded-lg bg-[#0E172A]/70 border border-surface-border flex flex-col items-center justify-center shrink-0">
+      <span className="font-mono text-lg lg:text-xl font-bold text-text-secondary">#{rank}</span>
+      <span className="font-mono text-[10px] text-text-tertiary uppercase">HẠNG</span>
     </div>
   )
 }
@@ -273,20 +272,17 @@ export default function FOHDisplayPage() {
           document.exitFullscreen().catch(() => {})
         }
       }}
-      className="relative min-h-screen w-full bg-surface-base text-text-primary overflow-hidden select-none flex flex-col justify-between px-8 py-6 md:px-14 md:py-8"
+      className="relative min-h-screen w-full bg-[#050814] text-text-primary overflow-hidden select-none flex flex-col justify-between px-6 py-5 md:px-12 md:py-6 bg-cover bg-center bg-no-repeat"
+      style={{
+        backgroundImage: `linear-gradient(to bottom, rgba(5, 8, 20, 0.5) 0%, rgba(5, 8, 20, 0.72) 45%, rgba(5, 8, 20, 0.88) 100%), url('/images/foh-bg.jpg')`,
+      }}
     >
       <FireworksOverlay active={fireworks} />
 
-      {/* Background */}
-      <div className="absolute inset-0 z-0 overflow-hidden pointer-events-none" aria-hidden="true">
-        <DotGridBackground />
-        <div className="absolute -top-32 left-1/2 -translate-x-1/2 w-[750px] h-96 rounded-full bg-brand-cyan/5 blur-[150px]" />
-      </div>
-
       {/* Stage Header */}
-      <header className="relative z-10 flex flex-col items-center text-center space-y-2">
+      <header className="relative z-10 flex flex-col items-center text-center space-y-1.5 shrink-0">
         <div className="flex flex-wrap items-center justify-center gap-2.5">
-          <div className="inline-flex items-center gap-2 px-4 py-1 rounded-full bg-surface-raised border border-brand-cyan/30 text-brand-cyan text-xs font-mono uppercase tracking-wider">
+          <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-[#0B132B]/85 backdrop-blur-md border border-brand-cyan/40 text-brand-cyan text-xs font-mono uppercase tracking-wider shadow-sm">
             <Image
               src="/logo/gendarena-logo.png"
               alt="GenD Arena 2026"
@@ -297,7 +293,7 @@ export default function FOHDisplayPage() {
             <span>{state.roundName}</span>
           </div>
 
-          <div className="inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full bg-brand-navy border border-brand-cyan/50 text-text-primary text-xs font-mono font-semibold">
+          <div className="inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full bg-brand-navy/90 backdrop-blur-md border border-brand-cyan/60 text-text-primary text-xs font-mono font-semibold shadow-sm">
             {isBoothView ? (
               <>
                 <Vote className="size-3.5 text-brand-cyan" />
@@ -312,11 +308,11 @@ export default function FOHDisplayPage() {
           </div>
         </div>
 
-        <h1 className="font-display text-3xl md:text-5xl font-bold text-text-primary tracking-tight">
+        <h1 className="font-display text-2xl md:text-4xl lg:text-5xl font-bold text-text-primary tracking-tight drop-shadow-[0_4px_16px_rgba(0,0,0,0.8)]">
           {isBoothView ? state.boothTitle : state.title}
         </h1>
 
-        <p className="text-sm md:text-base text-text-secondary">
+        <p className="text-xs md:text-sm text-text-secondary drop-shadow-[0_2px_8px_rgba(0,0,0,0.8)]">
           {isBoothView ? state.boothSubtitle : state.subtitle}
         </p>
       </header>
@@ -330,7 +326,7 @@ export default function FOHDisplayPage() {
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.98 }}
             transition={{ duration: 0.35 }}
-            className="relative z-20 my-auto max-w-4xl mx-auto w-full flex flex-col items-center justify-center py-20 px-10 rounded-xl border border-surface-border bg-surface-overlay"
+            className="relative z-20 my-auto max-w-4xl mx-auto w-full flex flex-col items-center justify-center py-20 px-10 rounded-2xl border border-surface-border bg-[#0A1120]/90 backdrop-blur-xl shadow-2xl"
           >
             <div className="size-16 rounded-full border-2 border-t-brand-cyan border-r-accent-violet border-b-brand-navy-light border-l-transparent animate-spin mb-6" />
             <h2 className="font-display text-2xl md:text-4xl font-bold text-center text-text-primary">
@@ -346,7 +342,7 @@ export default function FOHDisplayPage() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="relative z-10 my-auto max-w-6xl w-full mx-auto space-y-3 py-3"
+            className="relative z-10 my-auto max-w-6xl w-full mx-auto space-y-2.5 lg:space-y-3 py-2"
           >
             {rankedTeams.map((team) => {
               const currentRank = isBoothView ? team.boothRank : team.rank
@@ -359,12 +355,12 @@ export default function FOHDisplayPage() {
               const isTop3 = currentRank === 3 && hasScore
 
               const cardStyle = isTop1
-                ? 'border-yellow-400/60 bg-surface-raised border-l-4 border-l-yellow-400'
+                ? 'border-yellow-400/80 bg-[#0A1120]/85 shadow-[0_0_24px_rgba(234,179,8,0.22)] border-l-4 border-l-yellow-400'
                 : isTop2
-                ? 'border-slate-300/50 bg-surface-raised border-l-4 border-l-slate-300'
+                ? 'border-slate-300/70 bg-[#0A1120]/85 shadow-[0_0_18px_rgba(203,213,225,0.18)] border-l-4 border-l-slate-300'
                 : isTop3
-                ? 'border-amber-500/50 bg-surface-raised border-l-4 border-l-amber-500'
-                : 'border-surface-border bg-surface-raised'
+                ? 'border-amber-500/70 bg-[#0A1120]/85 shadow-[0_0_18px_rgba(245,158,11,0.18)] border-l-4 border-l-amber-500'
+                : 'border-surface-border/90 bg-[#0A1120]/80 shadow-[0_4px_16px_rgba(0,0,0,0.4)]'
 
               const barPct = isBoothView
                 ? hasScore
@@ -384,119 +380,53 @@ export default function FOHDisplayPage() {
                   key={team.id}
                   layout
                   transition={{ type: 'spring', stiffness: 320, damping: 32 }}
-                  className={`rounded-xl border px-5 py-3.5 transition-colors duration-200 ${cardStyle}`}
+                  className={`rounded-xl border px-4 py-3 lg:px-6 lg:py-3.5 backdrop-blur-md transition-colors duration-200 ${cardStyle}`}
                 >
-                  <div className="flex items-center gap-5">
-                    {/* Synchronized Rank Badge */}
+                  <div className="flex items-center gap-3.5 lg:gap-5 w-full">
+                    {/* 1. Synchronized Rank Badge (Fixed Width) */}
                     <StageRankBadge rank={currentRank} hasScore={hasScore} />
 
-                    {/* Team Poster Thumbnail */}
-                    <div className="relative size-16 rounded-lg overflow-hidden border border-surface-border bg-surface-overlay shrink-0">
+                    {/* 2. Team Poster Thumbnail (Fixed Size) */}
+                    <div className="relative size-12 lg:size-14 rounded-lg overflow-hidden border border-surface-border bg-surface-overlay shrink-0 shadow-sm">
                       <Image
                         src={team.posterUrl}
                         alt={team.name}
                         fill
-                        sizes="64px"
+                        sizes="56px"
                         className="object-cover"
                       />
                     </div>
 
-                    {/* Team Info + 3-Stage Breakdown or Booth Progress */}
-                    <div className="flex-1 min-w-0">
-                      <div className="flex flex-wrap items-center justify-between gap-4 mb-2">
-                        <div className="min-w-0">
-                          <div className="flex items-center gap-2 mb-0.5">
-                            <span className="px-2 py-0.5 rounded bg-brand-cyan/15 border border-brand-cyan/30 font-mono text-xs font-bold text-brand-cyan">
-                              {isBoothView ? `Gian hàng #${team.msbc}` : `Đội #${team.msbc}`}
-                            </span>
-                            <span className="text-xs font-mono text-text-tertiary truncate">
-                              {team.institution}
-                            </span>
-                            {rankDiff > 0 && (
-                              <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded bg-semantic-success/15 text-semantic-success font-mono text-xs font-bold">
-                                <TrendingUp className="size-3" />+{rankDiff}
-                              </span>
-                            )}
-                            {rankDiff < 0 && (
-                              <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded bg-semantic-danger/15 text-semantic-danger font-mono text-xs font-bold">
-                                <TrendingDown className="size-3" />
-                                {rankDiff}
-                              </span>
-                            )}
-                          </div>
-
-                          <h3 className="font-display text-2xl md:text-3xl font-bold text-text-primary truncate">
-                            {team.name}
-                          </h3>
-                        </div>
-
-                        {/* Center-Right: 3 Stage Score Pills (Only in STAGES view) */}
-                        {!isBoothView && (
-                          <div className="flex items-center gap-2 shrink-0">
-                            {([1, 2, 3] as const).map((stNum) => {
-                              const stVal =
-                                stNum === 1
-                                  ? team.stage1
-                                  : stNum === 2
-                                  ? team.stage2
-                                  : team.stage3
-                              const stName =
-                                stNum === 1
-                                  ? state.stageNames.s1
-                                  : stNum === 2
-                                  ? state.stageNames.s2
-                                  : state.stageNames.s3
-                              const isHighlighted =
-                                state.activeStage === stNum || state.activeStage === 'ALL'
-
-                              return (
-                                <div
-                                  key={stNum}
-                                  className={`px-3 py-1.5 rounded-lg border text-center min-w-[96px] ${
-                                    state.activeStage === stNum
-                                      ? 'bg-brand-navy border-brand-cyan'
-                                      : isHighlighted
-                                      ? 'bg-surface-overlay border-surface-border-strong'
-                                      : 'bg-surface-overlay/50 border-surface-border opacity-75'
-                                  }`}
-                                >
-                                  <div className="text-[10px] font-mono uppercase text-text-tertiary truncate">
-                                    {stName}
-                                  </div>
-                                  <div className="font-mono text-base font-bold text-text-primary tabular-nums">
-                                    {stVal}
-                                    <span className="text-[11px] text-text-tertiary font-normal">
-                                      /{MAX_STAGE_SCORE}
-                                    </span>
-                                  </div>
-                                </div>
-                              )
-                            })}
-                          </div>
+                    {/* 3. Team Main Info & Progress Bar (Flexible center area) */}
+                    <div className="flex-1 min-w-0 pr-2">
+                      <div className="flex items-center gap-2 mb-0.5">
+                        <span className="px-2 py-0.5 rounded bg-brand-cyan/15 border border-brand-cyan/30 font-mono text-[11px] lg:text-xs font-bold text-brand-cyan shrink-0">
+                          {isBoothView ? `Gian hàng #${team.msbc}` : `Đội #${team.msbc}`}
+                        </span>
+                        <span className="text-[11px] lg:text-xs font-mono text-text-tertiary truncate max-w-[200px] sm:max-w-xs md:max-w-sm">
+                          {team.institution}
+                        </span>
+                        {rankDiff > 0 && (
+                          <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded bg-semantic-success/15 text-semantic-success font-mono text-[11px] font-bold shrink-0">
+                            <TrendingUp className="size-3" />+{rankDiff}
+                          </span>
                         )}
-
-                        {/* Rightmost: Total Score /150 OR Booth Votes */}
-                        <div className="text-right shrink-0 min-w-[135px]">
-                          <div className="text-[10px] font-mono uppercase tracking-wider text-text-tertiary mb-0.5">
-                            {isBoothView
-                              ? `Tỷ lệ: ${voteSharePct}%`
-                              : `Tổng Điểm / ${MAX_TOTAL_SCORE}`}
-                          </div>
-                          <div
-                            className="font-mono text-3xl md:text-5xl font-bold tabular-nums leading-none"
-                            style={{ color: scoreColor(currentRank, hasScore) }}
-                          >
-                            {isBoothView
-                              ? team.boothVotes.toLocaleString('vi-VN')
-                              : team.score.toLocaleString('vi-VN')}
-                          </div>
-                        </div>
+                        {rankDiff < 0 && (
+                          <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded bg-semantic-danger/15 text-semantic-danger font-mono text-[11px] font-bold shrink-0">
+                            <TrendingDown className="size-3" />
+                            {rankDiff}
+                          </span>
+                        )}
                       </div>
 
-                      {/* Animated Progress Bar */}
+                      <h3 className="font-display text-lg lg:text-2xl font-bold text-text-primary truncate">
+                        {team.name}
+                      </h3>
+
+                      {/* Progress Bar under name */}
                       <div
-                        className="h-2 w-full rounded-full overflow-hidden"
-                        style={{ background: 'rgba(255,255,255,0.06)' }}
+                        className="h-1.5 w-full rounded-full overflow-hidden mt-1.5"
+                        style={{ background: 'rgba(255,255,255,0.08)' }}
                       >
                         <div
                           className="h-full rounded-full transition-all duration-700 ease-out"
@@ -505,6 +435,65 @@ export default function FOHDisplayPage() {
                             background: barGradient(currentRank, hasScore),
                           }}
                         />
+                      </div>
+                    </div>
+
+                    {/* 4. Right side: 3 Stage Pills (Only in STAGES mode, fixed width) */}
+                    {!isBoothView && (
+                      <div className="flex items-center gap-2 shrink-0">
+                        {([1, 2, 3] as const).map((stNum) => {
+                          const stVal =
+                            stNum === 1
+                              ? team.stage1
+                              : stNum === 2
+                              ? team.stage2
+                              : team.stage3
+                          const stName =
+                            stNum === 1
+                              ? state.stageNames.s1
+                              : stNum === 2
+                              ? state.stageNames.s2
+                              : state.stageNames.s3
+                          const isCurrentActive = state.activeStage === stNum
+
+                          return (
+                            <div
+                              key={stNum}
+                              className={`px-2.5 py-1.5 rounded-lg border text-center w-20 lg:w-24 shrink-0 transition-colors ${
+                                isCurrentActive
+                                  ? 'bg-brand-navy/90 border-brand-cyan shadow-[0_0_12px_rgba(0,212,255,0.3)]'
+                                  : 'bg-surface-overlay/70 border-surface-border'
+                              }`}
+                            >
+                              <div className="text-[10px] font-mono uppercase text-text-tertiary truncate">
+                                {stName}
+                              </div>
+                              <div className="font-mono text-xs lg:text-sm font-bold text-text-primary tabular-nums">
+                                {stVal}
+                                <span className="text-[10px] text-text-tertiary font-normal">
+                                  /{MAX_STAGE_SCORE}
+                                </span>
+                              </div>
+                            </div>
+                          )
+                        })}
+                      </div>
+                    )}
+
+                    {/* 5. Rightmost: Total Score / Booth Votes (Fixed width, strictly no wrap) */}
+                    <div className="text-right shrink-0 w-28 lg:w-36">
+                      <div className="text-[10px] font-mono uppercase tracking-wider text-text-tertiary mb-0.5">
+                        {isBoothView
+                          ? `Tỷ lệ: ${voteSharePct}%`
+                          : `Tổng / ${MAX_TOTAL_SCORE}`}
+                      </div>
+                      <div
+                        className="font-mono text-2xl lg:text-4xl font-bold tabular-nums leading-none"
+                        style={{ color: scoreColor(currentRank, hasScore) }}
+                      >
+                        {isBoothView
+                          ? team.boothVotes.toLocaleString('vi-VN')
+                          : team.score.toLocaleString('vi-VN')}
                       </div>
                     </div>
                   </div>
@@ -516,7 +505,7 @@ export default function FOHDisplayPage() {
       </AnimatePresence>
 
       {/* Stage Footer */}
-      <footer className="relative z-10 flex items-center justify-between text-xs font-mono text-text-tertiary border-t border-surface-border pt-3">
+      <footer className="relative z-10 flex items-center justify-between text-[11px] lg:text-xs font-mono text-text-tertiary border-t border-surface-border/80 pt-2.5 shrink-0 bg-[#050814]/40 backdrop-blur-sm -mx-6 -mb-5 px-6 pb-2.5 md:-mx-12 md:-mb-6 md:px-12">
         <div className="flex items-center gap-2">
           <ShieldCheck className="size-3.5 text-brand-cyan" />
           <span>
