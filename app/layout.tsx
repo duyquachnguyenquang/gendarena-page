@@ -19,7 +19,7 @@ const inter = Inter({
 // Be Vietnam Pro — body font, optimised for Vietnamese diacritics
 const beVietnamPro = Be_Vietnam_Pro({
   subsets: ["latin", "vietnamese"],
-  weight: ["400", "500", "600"],
+  weight: ["400", "500", "600", "700", "800", "900"],
   variable: "--font-be-vietnam-pro",
   display: "swap",
 })

@@ -39,7 +39,7 @@ function StageRankBadge({ rank, hasScore }: { rank: number; hasScore: boolean })
     return (
       <div className="w-20 lg:w-24 py-2 rounded-lg bg-yellow-500/15 border border-yellow-400/60 flex flex-col items-center justify-center shrink-0 shadow-[0_0_12px_rgba(234,179,8,0.2)]">
         <Trophy className="size-5 lg:size-6 text-yellow-400" />
-        <span className="font-mono text-[11px] lg:text-xs font-bold text-yellow-400 mt-0.5">HẠNG 1</span>
+        <span className="text-[11px] lg:text-xs font-bold text-yellow-400 mt-0.5 tracking-wide">HẠNG 1</span>
       </div>
     )
   }
@@ -47,7 +47,7 @@ function StageRankBadge({ rank, hasScore }: { rank: number; hasScore: boolean })
     return (
       <div className="w-20 lg:w-24 py-2 rounded-lg bg-slate-400/15 border border-slate-300/50 flex flex-col items-center justify-center shrink-0 shadow-[0_0_10px_rgba(203,213,225,0.15)]">
         <Medal className="size-5 lg:size-6 text-slate-300" />
-        <span className="font-mono text-[11px] lg:text-xs font-bold text-slate-200 mt-0.5">HẠNG 2</span>
+        <span className="text-[11px] lg:text-xs font-bold text-slate-200 mt-0.5 tracking-wide">HẠNG 2</span>
       </div>
     )
   }
@@ -55,14 +55,14 @@ function StageRankBadge({ rank, hasScore }: { rank: number; hasScore: boolean })
     return (
       <div className="w-20 lg:w-24 py-2 rounded-lg bg-amber-500/15 border border-amber-500/50 flex flex-col items-center justify-center shrink-0 shadow-[0_0_10px_rgba(245,158,11,0.15)]">
         <Medal className="size-5 lg:size-6 text-amber-500" />
-        <span className="font-mono text-[11px] lg:text-xs font-bold text-amber-400 mt-0.5">HẠNG 3</span>
+        <span className="text-[11px] lg:text-xs font-bold text-amber-400 mt-0.5 tracking-wide">HẠNG 3</span>
       </div>
     )
   }
   return (
     <div className="w-20 lg:w-24 py-2 rounded-lg bg-[#0E172A]/70 border border-surface-border flex flex-col items-center justify-center shrink-0">
-      <span className="font-mono text-lg lg:text-xl font-bold text-text-secondary">#{rank}</span>
-      <span className="font-mono text-[10px] text-text-tertiary uppercase">HẠNG</span>
+      <span className="text-lg lg:text-xl font-bold text-text-secondary tabular-nums">#{rank}</span>
+      <span className="text-[10px] text-text-tertiary uppercase font-semibold">HẠNG</span>
     </div>
   )
 }
@@ -216,7 +216,7 @@ function Stage3MemberPickerView({ state }: { state: FOHState }) {
             className="object-contain object-center"
             priority
           />
-          <div className="absolute top-3 left-3 px-3 py-1 rounded bg-black/80 backdrop-blur-md border border-brand-cyan/60 font-mono text-xs font-bold text-brand-cyan">
+          <div className="absolute top-3 left-3 px-3 py-1 rounded bg-black/80 backdrop-blur-md border border-brand-cyan/60 text-xs font-bold text-brand-cyan tabular-nums">
             MSBC #{activeTeam?.msbc}
           </div>
           <div className="absolute bottom-3 left-3 right-3 px-3 py-1.5 rounded-lg bg-black/85 backdrop-blur-md border border-white/10 text-xs text-text-secondary truncate font-medium">
@@ -227,7 +227,7 @@ function Stage3MemberPickerView({ state }: { state: FOHState }) {
         {/* Team Identity */}
         <div className="w-full">
           <div className="flex items-center justify-between">
-            <h2 className="font-display text-2xl lg:text-3xl font-bold text-white tracking-wide">
+            <h2 className="text-2xl lg:text-3xl font-bold text-white tracking-wide">
               {activeTeam?.name}
             </h2>
             <span className="text-xs font-semibold text-brand-cyan px-2 py-0.5 rounded bg-brand-cyan/10 border border-brand-cyan/30">
@@ -265,15 +265,15 @@ function Stage3MemberPickerView({ state }: { state: FOHState }) {
                   }`}
                 >
                   <div className="flex items-center justify-between">
-                    <span className="font-display text-sm font-bold truncate text-text-primary">
+                    <span className="text-sm font-bold truncate text-text-primary">
                       {m.name}
                     </span>
                     {m.role === 'leader' ? (
-                      <span className="text-[9px] font-sans font-semibold px-1.5 py-0.5 rounded bg-amber-500/20 text-amber-300 border border-amber-500/40 shrink-0">
+                      <span className="text-[9px] font-semibold px-1.5 py-0.5 rounded bg-amber-500/20 text-amber-300 border border-amber-500/40 shrink-0">
                         Trưởng nhóm
                       </span>
                     ) : (
-                      <span className="text-[9px] text-text-tertiary font-sans">Thành viên</span>
+                      <span className="text-[9px] text-text-tertiary">Thành viên</span>
                     )}
                   </div>
                   {m.faculty && (
@@ -310,7 +310,7 @@ function Stage3MemberPickerView({ state }: { state: FOHState }) {
               </div>
 
               <div className="py-2">
-                <h1 className="font-display text-4xl sm:text-5xl lg:text-6xl font-extrabold text-white tracking-wide">
+                <h1 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold text-white tracking-wide">
                   {picker.chosenMemberName}
                 </h1>
                 <div className="mt-2 text-sm text-brand-cyan font-medium">
@@ -325,15 +325,15 @@ function Stage3MemberPickerView({ state }: { state: FOHState }) {
                 </div>
                 <div className="flex items-center justify-between text-xs border-t border-surface-border/60 pt-2">
                   <span className="text-text-secondary">Thời gian chuẩn bị sân khấu:</span>
-                  <span className="font-bold font-mono text-brand-cyan">01 phút</span>
+                  <span className="font-bold tabular-nums text-brand-cyan">01 phút</span>
                 </div>
                 <div className="flex items-center justify-between text-xs border-t border-surface-border/60 pt-2">
                   <span className="text-text-secondary">Thời gian thuyết trình Pitching:</span>
-                  <span className="font-bold font-mono text-yellow-400">05 phút</span>
+                  <span className="font-bold tabular-nums text-yellow-400">05 phút</span>
                 </div>
                 <div className="flex items-center justify-between text-xs border-t border-surface-border/60 pt-2">
                   <span className="text-text-secondary">Vấn đáp Ban Giám Khảo:</span>
-                  <span className="font-bold font-mono text-text-primary">05 phút</span>
+                  <span className="font-bold tabular-nums text-text-primary">05 phút</span>
                 </div>
               </div>
             </motion.div>
@@ -345,7 +345,7 @@ function Stage3MemberPickerView({ state }: { state: FOHState }) {
               </div>
 
               <div className="w-full max-w-md px-6 py-8 rounded-2xl bg-surface-base border-2 border-brand-cyan/80 shadow-[0_0_30px_rgba(0,212,255,0.25)]">
-                <div className="font-display text-3xl sm:text-4xl lg:text-5xl font-bold text-white tracking-wide">
+                <div className="text-3xl sm:text-4xl lg:text-5xl font-bold text-white tracking-wide">
                   {displayedMember?.name || 'Đang chọn...'}
                 </div>
                 <div className="mt-2 text-xs text-brand-cyan font-medium">
@@ -365,7 +365,7 @@ function Stage3MemberPickerView({ state }: { state: FOHState }) {
                 <span>Bốc Thăm Thành Viên Vòng 3</span>
               </div>
 
-              <h3 className="font-display text-2xl sm:text-3xl font-bold text-white">
+              <h3 className="text-2xl sm:text-3xl font-bold text-white">
                 Sẵn Sàng Bốc Thăm Đại Diện
               </h3>
 
@@ -375,9 +375,9 @@ function Stage3MemberPickerView({ state }: { state: FOHState }) {
 
               <div className="w-full max-w-md p-4 rounded-xl bg-surface-base border border-surface-border text-xs text-text-secondary text-left space-y-1.5">
                 <div className="font-bold text-text-primary">Quy định thời gian Chặng 3:</div>
-                <div>• Chuẩn bị: <span className="text-brand-cyan font-bold font-mono">01 phút</span></div>
-                <div>• Thuyết trình: <span className="text-yellow-400 font-bold font-mono">05 phút</span></div>
-                <div>• Vấn đáp BGK: <span className="text-text-primary font-bold font-mono">05 phút</span></div>
+                <div>• Chuẩn bị: <span className="text-brand-cyan font-bold tabular-nums">01 phút</span></div>
+                <div>• Thuyết trình: <span className="text-yellow-400 font-bold tabular-nums">05 phút</span></div>
+                <div>• Vấn đáp BGK: <span className="text-text-primary font-bold tabular-nums">05 phút</span></div>
               </div>
             </div>
           )}
@@ -579,64 +579,17 @@ export default function FOHDisplayPage() {
     >
       <FireworksOverlay active={fireworks} />
 
-      {/* Stage Header */}
-      <header className="relative z-10 flex flex-col items-center text-center space-y-2 shrink-0">
-        <div className="flex flex-wrap items-center justify-center gap-2">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#0B132B]/90 border border-brand-cyan/40 text-brand-cyan text-xs font-semibold uppercase tracking-wider">
-            <Image
-              src="/logo/gendarena-logo.png"
-              alt="GenD Arena 2026"
-              width={16}
-              height={16}
-              className="object-contain"
-            />
-            <span>GEN D ARENA 2026 • CHUNG KẾT TOÀN QUỐC</span>
-          </div>
-
-          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-brand-navy/90 border border-brand-cyan/60 text-text-primary text-xs font-semibold">
-            {isTimerView ? (
-              <>
-                <Timer className="size-3.5 text-brand-cyan" />
-                <span>ĐỒNG HỒ THI ĐẤU TRỰC TIẾP</span>
-              </>
-            ) : isStage3PickerView ? (
-              <>
-                <Dices className="size-3.5 text-brand-cyan" />
-                <span>VÒNG 3 • BỐC THĂM ĐẠI DIỆN THUYẾT TRÌNH</span>
-              </>
-            ) : isBoothView ? (
-              <>
-                <Vote className="size-3.5 text-brand-cyan" />
-                <span>BẢNG ĐIỂM GIAN HÀNG ({totalBoothVotes.toLocaleString('vi-VN')} PHIẾU)</span>
-              </>
-            ) : (
-              <>
-                <Layers className="size-3.5 text-brand-cyan" />
-                <span>{activeStageLabel}</span>
-              </>
-            )}
-          </div>
-        </div>
-
-        <h1 className="font-display text-2xl md:text-4xl lg:text-5xl font-bold text-white tracking-tight drop-shadow-[0_2px_12px_rgba(0,0,0,0.8)]">
+      {/* Stage Header - Chỉ hiện tiêu đề sạch, không hiện bất kỳ ô box dư thừa nào xung quanh */}
+      <header className="relative z-10 flex flex-col items-center text-center shrink-0 py-2">
+        <h1 className="text-2xl md:text-4xl lg:text-5xl font-bold text-white tracking-tight drop-shadow-[0_2px_12px_rgba(0,0,0,0.8)]">
           {isTimerView
-            ? state.timer?.roundLabel || 'Đồng Hồ Thi Đấu Trực Tiếp'
+            ? (state.timer?.roundLabel || 'Đồng Hồ Thi Đấu Trực Tiếp').replace(/\s*\(\d+\s*phút\)/gi, '').trim()
             : isStage3PickerView
             ? 'Bốc Thăm Thành Viên Thuyết Trình Vòng 3'
             : isBoothView
             ? state.boothTitle
             : state.title}
         </h1>
-
-        <p className="text-xs md:text-sm text-text-secondary">
-          {isTimerView
-            ? `Đang thi đấu: ${activeTimerTeam?.name} (#${activeTimerTeam?.msbc}) • ${activeTimerTeam?.institution}`
-            : isStage3PickerView
-            ? `Đội thi: ${activeStage3Team?.name} (#${activeStage3Team?.msbc}) • Kế hoạch huy động vốn`
-            : isBoothView
-            ? state.boothSubtitle
-            : state.subtitle}
-        </p>
       </header>
 
       {/* Stage Body: Curtain, Fullscreen Stage Timer, Stage 3 Member Picker, or Live Leaderboard */}
@@ -651,7 +604,7 @@ export default function FOHDisplayPage() {
             className="relative z-20 my-auto max-w-4xl mx-auto w-full flex flex-col items-center justify-center py-20 px-10 rounded-2xl border border-surface-border bg-[#0A1120]/90 backdrop-blur-xl shadow-2xl"
           >
             <div className="size-16 rounded-full border-2 border-t-brand-cyan border-r-accent-violet border-b-brand-navy-light border-l-transparent animate-spin mb-6" />
-            <h2 className="font-display text-2xl md:text-4xl font-bold text-center text-text-primary">
+            <h2 className="text-2xl md:text-4xl font-bold text-center text-text-primary">
               {state.hiddenMessage}
             </h2>
             <p className="mt-3 text-sm text-text-secondary uppercase tracking-wider font-medium">
@@ -680,7 +633,7 @@ export default function FOHDisplayPage() {
                   className="object-contain object-center"
                   priority
                 />
-                <div className="absolute top-3 left-3 px-3 py-1 rounded bg-black/80 backdrop-blur-md border border-brand-cyan/60 font-mono text-xs font-bold text-brand-cyan">
+                <div className="absolute top-3 left-3 px-3 py-1 rounded bg-black/80 backdrop-blur-md border border-brand-cyan/60 text-xs font-bold text-brand-cyan tabular-nums">
                   MSBC #{activeTimerTeam?.msbc}
                 </div>
                 <div className="absolute bottom-3 left-3 right-3 px-3 py-1.5 rounded-lg bg-black/85 backdrop-blur-md border border-white/10 text-xs text-text-secondary truncate font-medium">
@@ -689,7 +642,7 @@ export default function FOHDisplayPage() {
               </div>
 
               <div className="w-full">
-                <h2 className="font-display text-2xl lg:text-3xl font-bold text-white tracking-wide">
+                <h2 className="text-2xl lg:text-3xl font-bold text-white tracking-wide">
                   {activeTimerTeam?.name}
                 </h2>
                 {activeTimerTeam?.slogan && (
@@ -712,11 +665,11 @@ export default function FOHDisplayPage() {
                     >
                       <span className="font-semibold text-text-primary truncate">{m.name}</span>
                       {m.role === 'leader' ? (
-                        <span className="text-[9px] font-sans font-semibold px-1.5 py-0.5 rounded bg-amber-500/20 text-amber-300 border border-amber-500/40 shrink-0">
+                        <span className="text-[9px] font-semibold px-1.5 py-0.5 rounded bg-amber-500/20 text-amber-300 border border-amber-500/40 shrink-0">
                           Trưởng nhóm
                         </span>
                       ) : (
-                        <span className="text-[9px] text-text-tertiary font-sans">Thành viên</span>
+                        <span className="text-[9px] text-text-tertiary">Thành viên</span>
                       )}
                     </div>
                   ))}
@@ -724,71 +677,98 @@ export default function FOHDisplayPage() {
               </div>
             </div>
 
-            {/* Right Spotlight: Huge Clean Broadcast Countdown Clock */}
-            <div className="lg:col-span-6 flex flex-col items-center justify-center p-8 lg:p-12 rounded-2xl bg-[#0A1120]/95 border border-surface-border shadow-2xl relative overflow-hidden">
-              <div className="relative z-10 inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-surface-base border border-brand-cyan/40 text-text-primary text-xs sm:text-sm font-semibold mb-6">
-                <Clock className="size-4 text-brand-cyan" />
-                <span>{state.timer?.roundLabel || 'Vòng Thi Đấu Chung Kết'}</span>
-              </div>
-
-              <div className="relative z-10 flex flex-col items-center">
+            {/* Right Spotlight: Circular Broadcast Countdown Clock (No horizontal bar) */}
+            <div className="lg:col-span-6 flex flex-col items-center justify-center p-6 sm:p-8 lg:p-10 rounded-2xl bg-[#0A1120]/95 border border-surface-border shadow-2xl relative overflow-hidden min-h-[460px]">
+              {/* Circular Timer Visual */}
+              <div className="relative size-72 sm:size-80 lg:size-96 flex items-center justify-center">
+                {/* Outer Ambient Glow */}
                 <div
-                  className={`font-mono text-8xl sm:text-9xl font-bold tracking-widest tabular-nums leading-none select-none transition-colors duration-200 ${
-                    isTimerUrgent ? 'animate-pulse' : ''
+                  className="absolute inset-0 rounded-full blur-3xl opacity-25 pointer-events-none transition-colors duration-500"
+                  style={{ background: timerColor }}
+                />
+
+                {/* Rotating Outer Dashed Orbit Ring */}
+                <div
+                  className={`absolute -inset-3 rounded-full border border-dashed pointer-events-none transition-opacity duration-300 ${
+                    state.timer?.mode === 'RUNNING'
+                      ? 'border-brand-cyan/35 animate-[spin_35s_linear_infinite]'
+                      : 'border-white/10 opacity-30'
                   }`}
-                  style={{
-                    color: timerColor,
-                    textShadow: `0 0 40px ${timerColor}44`,
-                  }}
+                />
+
+                {/* SVG Progress Circle */}
+                <svg
+                  className="size-full -rotate-90 origin-center"
+                  viewBox="0 0 280 280"
                 >
-                  {formatTimerSeconds(timerRemaining)}
-                </div>
-
-                <div className="mt-6 flex items-center gap-2">
-                  {state.timer?.mode === 'RUNNING' && timerRemaining > 0 && (
-                    <span className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-emerald-500/15 border border-emerald-500/40 text-emerald-400 text-xs font-bold font-sans">
-                      <span className="size-2 rounded-full bg-emerald-400 animate-ping" />
-                      <span>ĐANG TÍNH GIỜ THI ĐẤU</span>
-                    </span>
-                  )}
-                  {state.timer?.mode === 'PAUSED' && (
-                    <span className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full bg-amber-500/15 border border-amber-500/40 text-amber-400 text-xs font-bold font-sans">
-                      <Pause className="size-3.5" />
-                      <span>TẠM DỪNG THỜI GIAN</span>
-                    </span>
-                  )}
-                  {isTimerFinished && (
-                    <span className="inline-flex items-center gap-1.5 px-5 py-2 rounded-full bg-red-500/20 border border-red-500 text-red-400 text-sm font-bold font-sans">
-                      <AlertTriangle className="size-4" />
-                      <span>HẾT GIỜ THI ĐẤU</span>
-                    </span>
-                  )}
-                  {state.timer?.mode === 'STOPPED' && timerRemaining > 0 && (
-                    <span className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full bg-surface-base border border-surface-border text-text-tertiary text-xs font-bold font-sans">
-                      <span>CHỜ BẮT ĐẦU</span>
-                    </span>
-                  )}
-                </div>
-              </div>
-
-              {/* Progress bar */}
-              <div className="relative z-10 w-full mt-8">
-                <div className="flex items-center justify-between text-xs font-mono text-text-tertiary mb-2">
-                  <span>Tiến độ thời gian thi đấu</span>
-                  <span className="font-bold text-text-primary">{timerProgressPct.toFixed(0)}% còn lại</span>
-                </div>
-                <div className="h-2.5 w-full rounded-full bg-surface-base border border-surface-border overflow-hidden p-0.5">
-                  <div
-                    className="h-full rounded-full transition-all duration-300 ease-out"
+                  {/* Subtle Track */}
+                  <circle
+                    cx="140"
+                    cy="140"
+                    r={120}
+                    stroke="rgba(255, 255, 255, 0.07)"
+                    strokeWidth="10"
+                    fill="none"
+                  />
+                  {/* Animated Countdown Ring */}
+                  <circle
+                    cx="140"
+                    cy="140"
+                    r={120}
+                    stroke={timerColor}
+                    strokeWidth="10"
+                    strokeLinecap="round"
+                    fill="none"
+                    strokeDasharray={2 * Math.PI * 120}
+                    strokeDashoffset={
+                      (2 * Math.PI * 120) * (1 - timerProgressPct / 100)
+                    }
+                    className="transition-all duration-1000 ease-linear"
                     style={{
-                      width: `${timerProgressPct}%`,
-                      background: isTimerUrgent
-                        ? '#EF4444'
-                        : isTimerWarning
-                        ? '#F59E0B'
-                        : '#00D4FF',
+                      filter: `drop-shadow(0 0 16px ${timerColor}99)`,
                     }}
                   />
+                </svg>
+
+                {/* Centered Countdown Digits & Status Badge */}
+                <div className="absolute inset-0 flex flex-col items-center justify-center text-center p-6 z-10">
+                  <div
+                    className={`font-extrabold tabular-nums leading-none select-none transition-colors duration-200 text-6xl sm:text-7xl lg:text-8xl tracking-tight ${
+                      isTimerUrgent ? 'animate-pulse' : ''
+                    }`}
+                    style={{
+                      color: timerColor,
+                      textShadow: `0 0 40px ${timerColor}60`,
+                    }}
+                  >
+                    {formatTimerSeconds(timerRemaining)}
+                  </div>
+
+                  <div className="mt-5 flex items-center justify-center">
+                    {state.timer?.mode === 'RUNNING' && timerRemaining > 0 && (
+                      <span className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-emerald-500/15 border border-emerald-500/40 text-emerald-400 text-xs sm:text-sm font-bold tracking-wide">
+                        <span className="size-2 rounded-full bg-emerald-400 animate-ping" />
+                        <span>ĐANG TÍNH GIỜ</span>
+                      </span>
+                    )}
+                    {state.timer?.mode === 'PAUSED' && (
+                      <span className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full bg-amber-500/15 border border-amber-500/40 text-amber-400 text-xs sm:text-sm font-bold tracking-wide">
+                        <Pause className="size-3.5" />
+                        <span>TẠM DỪNG</span>
+                      </span>
+                    )}
+                    {isTimerFinished && (
+                      <span className="inline-flex items-center gap-1.5 px-5 py-2 rounded-full bg-red-500/20 border border-red-500 text-red-400 text-sm font-bold tracking-wide animate-bounce">
+                        <AlertTriangle className="size-4" />
+                        <span>HẾT GIỜ THI ĐẤU</span>
+                      </span>
+                    )}
+                    {state.timer?.mode === 'STOPPED' && timerRemaining > 0 && (
+                      <span className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full bg-surface-base border border-surface-border text-text-tertiary text-xs sm:text-sm font-bold tracking-wide">
+                        <span>CHỜ BẮT ĐẦU</span>
+                      </span>
+                    )}
+                  </div>
                 </div>
               </div>
             </div>
@@ -807,10 +787,10 @@ export default function FOHDisplayPage() {
                 <div className="relative z-10 mb-2 py-2 px-4 rounded-xl bg-[#0B132B]/90 border border-brand-cyan/50 backdrop-blur-md flex items-center justify-between shadow-[0_0_20px_rgba(0,212,255,0.15)]">
                   <div className="flex items-center gap-2.5 min-w-0">
                     <span className="size-2 rounded-full bg-emerald-400 animate-ping shrink-0" />
-                    <span className="font-mono text-xs font-bold text-brand-cyan uppercase tracking-wider shrink-0">
+                    <span className="text-xs font-bold text-brand-cyan uppercase tracking-wider shrink-0">
                       TIMELINE:
                     </span>
-                    <span className="font-display text-sm font-bold text-text-primary truncate">
+                    <span className="text-sm font-bold text-text-primary truncate">
                       {activeTimerTeam?.name || 'Đội thi đấu'}
                     </span>
                     <span className="text-xs text-text-tertiary truncate hidden sm:inline">
@@ -819,7 +799,7 @@ export default function FOHDisplayPage() {
                   </div>
                   <div className="flex items-center gap-3 shrink-0">
                     <span
-                      className={`font-mono text-xl sm:text-2xl font-bold tracking-wider tabular-nums ${
+                      className={`text-xl sm:text-2xl font-bold tracking-wider tabular-nums ${
                         timerRemaining <= 30 && timerRemaining > 0
                           ? 'text-red-400 animate-pulse'
                           : timerRemaining <= 60
@@ -888,26 +868,26 @@ export default function FOHDisplayPage() {
                     {/* 3. Team Main Info & Progress Bar (Flexible center area) */}
                     <div className="flex-1 min-w-0 pr-2">
                       <div className="flex items-center gap-2 mb-0.5">
-                        <span className="px-2 py-0.5 rounded bg-brand-cyan/15 border border-brand-cyan/30 font-mono text-[11px] lg:text-xs font-bold text-brand-cyan shrink-0">
+                        <span className="px-2 py-0.5 rounded bg-brand-cyan/15 border border-brand-cyan/30 text-[11px] lg:text-xs font-bold text-brand-cyan shrink-0 tabular-nums">
                           {isBoothView ? `Gian hàng #${team.msbc}` : `Đội #${team.msbc}`}
                         </span>
                         <span className="text-[11px] lg:text-xs text-text-secondary truncate max-w-[200px] sm:max-w-xs md:max-w-sm">
                           {team.institution}
                         </span>
                         {rankDiff > 0 && (
-                          <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded bg-semantic-success/15 text-semantic-success font-mono text-[11px] font-bold shrink-0">
+                          <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded bg-semantic-success/15 text-semantic-success text-[11px] font-bold shrink-0 tabular-nums">
                             <TrendingUp className="size-3" />+{rankDiff}
                           </span>
                         )}
                         {rankDiff < 0 && (
-                          <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded bg-semantic-danger/15 text-semantic-danger font-mono text-[11px] font-bold shrink-0">
+                          <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded bg-semantic-danger/15 text-semantic-danger text-[11px] font-bold shrink-0 tabular-nums">
                             <TrendingDown className="size-3" />
                             {rankDiff}
                           </span>
                         )}
                       </div>
 
-                      <h3 className="font-display text-lg lg:text-2xl font-bold text-white truncate">
+                      <h3 className="text-lg lg:text-2xl font-bold text-white truncate">
                         {team.name}
                       </h3>
 
@@ -959,14 +939,14 @@ export default function FOHDisplayPage() {
                               key={stNum}
                               className={`px-2.5 py-1.5 rounded-lg border text-center w-20 lg:w-24 shrink-0 transition-colors ${
                                 isCurrentActive
-                                  ? 'bg-brand-navy/90 border-brand-cyan shadow-[0_0_12px_rgba(0,212,255,0.3)]'
+                                    ? 'bg-brand-navy/90 border-brand-cyan shadow-[0_0_12px_rgba(0,212,255,0.3)]'
                                   : 'bg-surface-overlay/70 border-surface-border'
                               }`}
                             >
-                              <div className="text-[10px] font-mono uppercase text-text-tertiary truncate">
+                              <div className="text-[10px] uppercase text-text-tertiary truncate font-semibold">
                                 {stName}
                               </div>
-                              <div className="font-mono text-xs lg:text-sm font-bold text-text-primary tabular-nums">
+                              <div className="text-xs lg:text-sm font-bold text-text-primary tabular-nums">
                                 {stVal}
                                 <span className="text-[10px] text-text-tertiary font-normal">
                                   /{MAX_STAGE_SCORE}
@@ -980,13 +960,13 @@ export default function FOHDisplayPage() {
 
                     {/* 5. Rightmost: Total Score / Booth Votes (Fixed width, strictly no wrap) */}
                     <div className="text-right shrink-0 w-28 lg:w-36">
-                      <div className="text-[10px] font-mono uppercase tracking-wider text-text-tertiary mb-0.5">
+                      <div className="text-[10px] uppercase tracking-wider text-text-tertiary mb-0.5 font-semibold">
                         {isBoothView
                           ? `Tỷ lệ: ${voteSharePct}%`
                           : `Tổng / ${MAX_TOTAL_SCORE}`}
                       </div>
                       <div
-                        className="font-mono text-2xl lg:text-4xl font-bold tabular-nums leading-none"
+                        className="text-2xl lg:text-4xl font-bold tabular-nums leading-none"
                         style={{ color: scoreColor(currentRank, hasScore) }}
                       >
                         {isBoothView

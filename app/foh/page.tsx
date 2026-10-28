@@ -45,7 +45,7 @@ export default function FOHPortalPage() {
               className="object-contain"
               priority
             />
-            <span className="font-display text-base font-bold tracking-wider text-text-primary">
+            <span className="text-base font-bold tracking-wider text-text-primary">
               GEND ARENA 2026
             </span>
             <Badge variant="info" size="sm">
@@ -67,7 +67,7 @@ export default function FOHPortalPage() {
             <Trophy className="size-3.5" />
             <span>ĐÊM CHUNG KẾT GEND ARENA: DEVELOP • TOP 5 CHUNG KẾT</span>
           </div>
-          <h1 className="font-display text-3xl md:text-5xl font-bold text-text-primary tracking-tight">
+          <h1 className="text-3xl md:text-5xl font-bold text-text-primary tracking-tight">
             Hệ Thống Điều Hành Điểm Số FOH
           </h1>
           <p className="text-base text-text-secondary">
@@ -88,10 +88,10 @@ export default function FOHPortalPage() {
                   <Sliders className="size-3.5" />
                   Luồng 1 • Bàn Điều Khiển FOH
                 </span>
-                <span className="font-mono text-xs text-text-tertiary">/foh/admin</span>
+                <span className="text-xs text-text-tertiary">/foh/admin</span>
               </div>
 
-              <h2 className="font-display text-2xl font-semibold text-text-primary group-hover:text-brand-cyan transition-colors">
+              <h2 className="text-2xl font-semibold text-text-primary group-hover:text-brand-cyan transition-colors">
                 Giao Diện Người Nhập Điểm
               </h2>
 
@@ -118,10 +118,10 @@ export default function FOHPortalPage() {
                   <Monitor className="size-3.5" />
                   Luồng 2 • Màn Hình LED / Máy Chiếu
                 </span>
-                <span className="font-mono text-xs text-text-tertiary">/foh/display</span>
+                <span className="text-xs text-text-tertiary">/foh/display</span>
               </div>
 
-              <h2 className="font-display text-2xl font-semibold text-text-primary group-hover:text-brand-cyan transition-colors">
+              <h2 className="text-2xl font-semibold text-text-primary group-hover:text-brand-cyan transition-colors">
                 Giao Diện Màn Chiếu Sân Khấu
               </h2>
 
@@ -171,8 +171,8 @@ export default function FOHPortalPage() {
                   />
                 </div>
                 <div className="min-w-0">
-                  <div className="font-mono text-[11px] font-bold text-brand-cyan">#{team.msbc}</div>
-                  <div className="font-display text-xs font-semibold text-text-primary truncate">
+                  <div className="text-[11px] font-bold text-brand-cyan">#{team.msbc}</div>
+                  <div className="text-xs font-semibold text-text-primary truncate">
                     {team.name}
                   </div>
                 </div>

@@ -1007,7 +1007,7 @@ export default function FOHAdminPage() {
                 height={20}
                 className="object-contain"
               />
-              <span className="font-display text-sm font-bold tracking-wide text-text-primary">
+              <span className="text-sm font-bold tracking-wide text-text-primary">
                 FOH CONSOLE
               </span>
             </div>
@@ -1365,7 +1365,7 @@ export default function FOHAdminPage() {
                               <span className="font-mono text-[11px] text-brand-cyan font-bold">
                                 #{team.msbc}
                               </span>
-                              <span className="font-display text-sm font-bold text-text-primary truncate">
+                              <span className="text-sm font-bold text-text-primary truncate">
                                 {team.name}
                               </span>
                               <button
@@ -1546,7 +1546,7 @@ export default function FOHAdminPage() {
                     </div>
                     <div>
                       <div className="flex items-center gap-2">
-                        <span className="font-display text-xs font-bold text-text-primary tracking-wide">
+                        <span className="text-xs font-bold text-text-primary tracking-wide">
                           ĐỒNG HỒ SÂN KHẤU (FOH TIMELINE CONSOLE)
                         </span>
                         {state.timer?.mode === 'RUNNING' && (
@@ -1651,7 +1651,7 @@ export default function FOHAdminPage() {
                     </div>
 
                     <div className="space-y-1">
-                      <div className="font-display text-sm font-bold text-text-primary">
+                      <div className="text-sm font-bold text-text-primary">
                         {state.teams.find((t) => t.id === state.timer?.activeTeamId)?.name || 'Chung Toàn Sân Khấu'}
                       </div>
                       <div className="font-mono text-xs text-text-tertiary">
@@ -1814,7 +1814,7 @@ export default function FOHAdminPage() {
                         <Dices className="size-4" />
                       </div>
                       <div>
-                        <div className="font-display text-xs font-bold text-text-primary tracking-wide">
+                        <div className="text-xs font-bold text-text-primary tracking-wide">
                           BỐC THĂM THÀNH VIÊN VÒNG 3 (HUY ĐỘNG VỐN)
                         </div>
                         <div className="text-[11px] text-text-tertiary">
@@ -1970,7 +1970,7 @@ export default function FOHAdminPage() {
                             <div className="inline-flex p-3 rounded-full bg-accent-violet/20 border border-accent-violet/40 text-accent-violet animate-spin">
                               <Dices className="size-8" />
                             </div>
-                            <div className="font-display text-sm font-bold text-accent-gold tracking-widest uppercase">
+                            <div className="text-sm font-bold text-accent-gold tracking-widest uppercase">
                               Đang bốc thăm ngẫu nhiên...
                             </div>
                             <div className="text-xs text-text-tertiary">
@@ -1983,7 +1983,7 @@ export default function FOHAdminPage() {
                               <CheckCircle2 className="size-3.5 text-accent-gold" />
                               <span>ĐẠI DIỆN THUYẾT TRÌNH VÒNG 3</span>
                             </div>
-                            <div className="font-display text-2xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-amber-300 via-yellow-200 to-cyan-300">
+                            <div className="text-2xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-amber-300 via-yellow-200 to-cyan-300">
                               {chosenName}
                             </div>
                             <div className="text-xs text-text-secondary">
@@ -2029,7 +2029,7 @@ export default function FOHAdminPage() {
                             <div className="inline-flex p-3 rounded-full bg-surface-raised border border-surface-border text-text-tertiary">
                               <Dices className="size-8" />
                             </div>
-                            <div className="font-display text-base font-bold text-text-primary">
+                            <div className="text-base font-bold text-text-primary">
                               Sẵn Sàng Bốc Thăm Đại Diện Đội {selectedTeam?.name}
                             </div>
                             <div className="text-xs text-text-tertiary max-w-sm mx-auto">
@@ -2045,7 +2045,7 @@ export default function FOHAdminPage() {
                           type="button"
                           disabled={isRolling || activeMembers.length === 0}
                           onClick={() => handleRollStage3Member(selectedTeam.id)}
-                          className="w-full py-3 rounded-xl bg-gradient-to-r from-accent-violet via-purple-600 to-indigo-600 hover:from-accent-violet/90 hover:to-indigo-500 text-white font-display text-sm font-bold tracking-wider uppercase transition-all shadow-[0_0_16px_rgba(168,85,247,0.35)] flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
+                          className="w-full py-3 rounded-xl bg-gradient-to-r from-accent-violet via-purple-600 to-indigo-600 hover:from-accent-violet/90 hover:to-indigo-500 text-white text-sm font-bold tracking-wider uppercase transition-all shadow-[0_0_16px_rgba(168,85,247,0.35)] flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
                         >
                           <Dices className={`size-4 ${isRolling ? 'animate-spin' : ''}`} />
                           <span>
@@ -2101,7 +2101,7 @@ export default function FOHAdminPage() {
                               <span className="font-mono text-[11px] text-brand-cyan font-bold">
                                 #{team.msbc}
                               </span>
-                              <span className="font-display text-sm font-bold text-text-primary truncate">
+                              <span className="text-sm font-bold text-text-primary truncate">
                                 {team.name}
                               </span>
                             </div>
@@ -2209,7 +2209,7 @@ export default function FOHAdminPage() {
                   <div className="text-[10px] font-mono text-brand-cyan uppercase tracking-wider font-bold">
                     MÀN HÌNH ĐẾM GIỜ FULLSCREEN
                   </div>
-                  <div className="font-display text-sm font-bold text-text-primary truncate">
+                  <div className="text-sm font-bold text-text-primary truncate">
                     {state.teams.find((t) => t.id === ledSnapshot.timer?.activeTeamId)?.name || 'Chung'}
                   </div>
                   <div className="font-mono text-2xl font-bold text-brand-cyan tabular-nums tracking-wider">
@@ -2224,7 +2224,7 @@ export default function FOHAdminPage() {
                   <div className="text-[10px] font-mono text-accent-gold uppercase tracking-wider font-bold">
                     BỐC THĂM V3 FULLSCREEN
                   </div>
-                  <div className="font-display text-xs font-bold text-text-primary truncate">
+                  <div className="text-xs font-bold text-text-primary truncate">
                     {state.teams.find((t) => t.id === ledSnapshot.stage3Picker?.teamId)?.name || 'Chưa chọn'}
                   </div>
                   <div className="p-2 rounded bg-surface-raised border border-accent-gold/30">
@@ -2265,7 +2265,7 @@ export default function FOHAdminPage() {
                       >
                         <div className="flex items-center gap-1.5 truncate">
                           <span className="font-bold text-brand-cyan w-5 shrink-0">#{r}</span>
-                          <span className="truncate text-text-primary text-[11px] font-display font-semibold">
+                          <span className="truncate text-text-primary text-[11px] font-semibold">
                             {t.name}
                           </span>
                         </div>
@@ -2296,7 +2296,7 @@ export default function FOHAdminPage() {
         {showConfig && (
           <div className="rounded-xl border border-surface-border bg-[#0A1120] p-4 space-y-3 shadow-elevation-2">
             <div className="flex items-center justify-between">
-              <h3 className="font-display text-xs font-semibold uppercase tracking-wider text-text-primary flex items-center gap-1.5">
+              <h3 className="text-xs font-semibold uppercase tracking-wider text-text-primary flex items-center gap-1.5">
                 <Settings className="size-4 text-brand-cyan" />
                 <span>Cài Đặt Tên Chặng &amp; Sao Lưu Offline</span>
               </h3>
