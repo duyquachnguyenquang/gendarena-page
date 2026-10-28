@@ -40,7 +40,7 @@ export interface VotingConfig {
   roundTitle: string
   competitionName: string
   startDate: string // ISO string: 2026-10-25T20:00:00+07:00
-  endDate: string // ISO string: 2026-11-02T23:59:59+07:00
+  endDate: string // ISO string: 2026-11-07T20:00:00+07:00
   sponsor: {
     name: string
     brandName: string

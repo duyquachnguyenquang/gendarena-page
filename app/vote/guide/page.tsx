@@ -48,7 +48,7 @@ export default function VoteGuidePage() {
           </div>
 
           <span className="font-mono text-xs font-semibold text-brand-cyan bg-brand-cyan/10 px-2 py-0.5 rounded-[3px] border border-brand-cyan/25">
-            25.10. ~ 02.11.
+            25.10. ~ 07.11.
           </span>
         </div>
 
@@ -198,7 +198,7 @@ export default function VoteGuidePage() {
                 <Calendar className="size-4 text-brand-cyan shrink-0 mt-0.5" />
                 <div>
                   <span className="font-semibold text-text-primary block">Thời gian mở cổng</span>
-                  <span>20:00 ngày 25.10.2026 — 23:59 ngày 02.11.2026</span>
+                  <span>20:00 ngày 25.10.2026 — 20:00 ngày 07.11.2026</span>
                 </div>
               </div>
 

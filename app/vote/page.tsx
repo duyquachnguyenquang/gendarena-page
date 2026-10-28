@@ -8,7 +8,7 @@ export const dynamic = 'force-dynamic'
 
 export const metadata: Metadata = {
   title: `${VOTING_CONFIG.title} — ${VOTING_CONFIG.competitionName}`,
-  description: `Cổng bình chọn chính thức Vòng 3 cuộc thi khởi nghiệp công nghệ ${VOTING_CONFIG.competitionName}. Khám phá đề án và bình chọn cho Top 10 dự án xuất sắc nhất trên nền tảng Eventista từ 20:00 25/10 đến 23:59 02/11/2026.`,
+  description: `Cổng bình chọn chính thức Vòng 3 cuộc thi khởi nghiệp công nghệ ${VOTING_CONFIG.competitionName}. Khám phá đề án và bình chọn cho Top 10 dự án xuất sắc nhất trên nền tảng Eventista từ 20:00 25/10 đến 20:00 07/11/2026.`,
   openGraph: {
     title: `${VOTING_CONFIG.title} — ${VOTING_CONFIG.competitionName}`,
     description: `Bình chọn Top 10 Đội thi được yêu thích nhất - Vòng 3 GenD Arena 2026 trên nền tảng Eventista.`,

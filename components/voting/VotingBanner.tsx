@@ -139,14 +139,14 @@ export default function VotingBanner({
             {status === 'ACTIVE' && (
               <>
                 Thời gian bình chọn mở từ <strong>20:00 ngày 25/10</strong> đến{' '}
-                <strong className="text-text-primary">23:59 ngày 02/11/2026</strong>. Mỗi lượt bình chọn của bạn qua{' '}
+                <strong className="text-text-primary">20:00 ngày 07/11/2026</strong>. Mỗi lượt bình chọn của bạn qua{' '}
                 <span className="text-brand-cyan font-medium">Eventista</span> là lời động viên ý nghĩa nhất tiếp sức cho các bạn trẻ bước vào Đêm Chung kết.
               </>
             )}
             {status === 'ENDED' && (
               <>
                 Thời gian bình chọn đã khép lại vào lúc{' '}
-                <strong className="text-text-primary">23:59 ngày 02/11/2026</strong>. Ban tổ chức và 10 đội thi xin gửi lời tri ân sâu sắc đến toàn thể cộng đồng sinh viên đã đồng hành và cổ vũ!
+                <strong className="text-text-primary">20:00 ngày 07/11/2026</strong>. Ban tổ chức và 10 đội thi xin gửi lời tri ân sâu sắc đến toàn thể cộng đồng sinh viên đã đồng hành và cổ vũ!
               </>
             )}
           </p>
@@ -204,7 +204,7 @@ export default function VotingBanner({
                 <span>
                   {status === 'UPCOMING'
                     ? 'Mở cổng: 20:00 25/10/2026'
-                    : 'Đóng cổng: 23:59 02/11/2026'}
+                    : 'Đóng cổng: 20:00 07/11/2026'}
                 </span>
               </span>
             </div>

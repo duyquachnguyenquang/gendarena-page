@@ -53,8 +53,8 @@ export const VOTING_CONFIG: VotingConfig = {
   competitionName: 'GenD Arena 2026',
   // Bắt đầu: 20:00 ngày 25/10/2026 (GMT+7)
   startDate: '2026-10-25T20:00:00+07:00',
-  // Kết thúc: 23:59 ngày 02/11/2026 (GMT+7)
-  endDate: '2026-11-02T23:59:59+07:00',
+  // Kết thúc: 20:00 ngày 07/11/2026 (GMT+7)
+  endDate: '2026-11-07T20:00:00+07:00',
 
   sponsor: {
     name: 'Eventista',
@@ -75,7 +75,7 @@ export const VOTING_CONFIG: VotingConfig = {
       title: 'Khung giờ bình chọn chính thức',
       content: [
         'Mở cổng: 20:00 ngày 25.10.2026.',
-        'Đóng cổng: 23:59 ngày 02.11.2026.',
+        'Đóng cổng: 20:00 ngày 07.11.2026.',
         'Hệ thống Eventista tự động khóa cổng và chốt số liệu khi hết giờ.',
       ],
     },

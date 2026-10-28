@@ -26,8 +26,8 @@ const beVietnamPro = Be_Vietnam_Pro({
 
 // JetBrains Mono — monospace font for code blocks and technical data
 const jetbrainsMono = JetBrains_Mono({
-  subsets: ["latin"],
-  weight: ["400", "500"],
+  subsets: ["latin", "vietnamese"],
+  weight: ["400", "500", "700"],
   variable: "--font-jetbrains-mono",
   display: "swap",
 })

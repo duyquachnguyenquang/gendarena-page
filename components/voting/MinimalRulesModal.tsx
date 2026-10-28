@@ -167,7 +167,7 @@ export default function MinimalRulesModal({
                   <div>
                     <span className="font-semibold text-text-primary block">Khung giờ bình chọn</span>
                     <span className="text-[11px] text-text-tertiary">
-                      20:00 ngày <strong className="text-text-secondary">25.10.2026</strong> — 23:59 ngày <strong className="text-text-secondary">02.11.2026</strong>
+                      20:00 ngày <strong className="text-text-secondary">25.10.2026</strong> — 20:00 ngày <strong className="text-text-secondary">07.11.2026</strong>
                     </span>
                   </div>
                 </div>

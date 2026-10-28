@@ -63,9 +63,9 @@ export default function VotingRulesModal({ isOpen, onClose }: VotingRulesModalPr
                   <strong className="text-text-primary">Bắt đầu:</strong> 20:00 ngày 25/10/2026.
                 </li>
                 <li>
-                  <strong className="text-text-primary">Kết thúc:</strong> 23:59 ngày 02/11/2026.
+                  <strong className="text-text-primary">Kết thúc:</strong> 20:00 ngày 07/11/2026.
                 </li>
-                <li>Hệ thống máy chủ Eventista tự động khóa cổng khi đồng hồ điểm 23:59:59 ngày 02/11/2026.</li>
+                <li>Hệ thống máy chủ Eventista tự động khóa cổng khi đồng hồ điểm 20:00:00 ngày 07/11/2026.</li>
               </ul>
             </div>
 

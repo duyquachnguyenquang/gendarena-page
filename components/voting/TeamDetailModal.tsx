@@ -264,7 +264,7 @@ export default function TeamDetailModal({
                   className="w-full text-xs font-medium text-text-disabled border-surface-border justify-center"
                 >
                   <Lock className="size-3.5 text-text-tertiary mr-1.5" />
-                  <span>Bình chọn đã kết thúc vào 23:59 ngày 02/11/2026</span>
+                  <span>Bình chọn đã kết thúc vào 20:00 ngày 07/11/2026</span>
                 </Button>
               )}
 

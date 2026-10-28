@@ -24,7 +24,15 @@ import {
   Maximize2,
   Layers,
   Vote,
+  Timer,
+  Clock,
+  AlertTriangle,
+  Play,
+  Pause,
+  Sparkles,
+  Dices,
 } from 'lucide-react'
+import { formatTimerSeconds } from '@/lib/foh-sync'
 
 function StageRankBadge({ rank, hasScore }: { rank: number; hasScore: boolean }) {
   if (rank === 1 && hasScore) {
@@ -161,10 +169,232 @@ function FireworksOverlay({ active }: { active: boolean }) {
   return <canvas ref={canvasRef} className="fixed inset-0 pointer-events-none z-50" />
 }
 
+function Stage3MemberPickerView({ state }: { state: FOHState }) {
+  const picker = state.stage3Picker
+  const activeTeam =
+    state.teams.find((t) => t.id === picker?.teamId) || state.teams[0]
+  const members = activeTeam?.members || []
+  const [fakeIndex, setFakeIndex] = useState(0)
+
+  // Carousel fast spinning animation when isRolling is true
+  useEffect(() => {
+    if (!picker?.isRolling || members.length <= 1) return
+    const interval = setInterval(() => {
+      setFakeIndex((prev) => (prev + 1) % members.length)
+    }, 110)
+    return () => clearInterval(interval)
+  }, [picker?.isRolling, members.length])
+
+  const displayedMember = picker?.chosenMemberName
+    ? {
+        name: picker.chosenMemberName,
+        role: picker.chosenMemberRole || 'Thành viên',
+        institution: picker.chosenMemberInstitution || activeTeam.institution,
+      }
+    : picker?.isRolling && members.length > 0
+    ? members[fakeIndex]
+    : null
+
+  return (
+    <motion.div
+      key="stage3-picker"
+      initial={{ opacity: 0, scale: 0.98 }}
+      animate={{ opacity: 1, scale: 1 }}
+      exit={{ opacity: 0, scale: 0.98 }}
+      transition={{ duration: 0.25 }}
+      className="relative z-20 my-auto max-w-7xl mx-auto w-full grid grid-cols-1 lg:grid-cols-12 gap-8 items-start py-2"
+    >
+      {/* Left Spotlight: Full-Size Team Photo & Complete Member Roster */}
+      <div className="lg:col-span-6 flex flex-col items-center lg:items-start text-left space-y-3">
+        {/* Full-size 3:2 landscape team photo showing ALL 5 members */}
+        <div className="relative w-full aspect-[3/2] rounded-2xl overflow-hidden border border-brand-cyan/40 bg-black/70 shadow-2xl">
+          <Image
+            src={activeTeam?.posterUrl || '/images/teams/aqua-radar.webp'}
+            alt={activeTeam?.name || 'Đội thi'}
+            fill
+            sizes="(max-width: 1024px) 100vw, 640px"
+            className="object-contain object-center"
+            priority
+          />
+          <div className="absolute top-3 left-3 px-3 py-1 rounded bg-black/80 backdrop-blur-md border border-brand-cyan/60 font-mono text-xs font-bold text-brand-cyan">
+            MSBC #{activeTeam?.msbc}
+          </div>
+          <div className="absolute bottom-3 left-3 right-3 px-3 py-1.5 rounded-lg bg-black/85 backdrop-blur-md border border-white/10 text-xs text-text-secondary truncate font-medium">
+            {activeTeam?.institution}
+          </div>
+        </div>
+
+        {/* Team Identity */}
+        <div className="w-full">
+          <div className="flex items-center justify-between">
+            <h2 className="font-display text-2xl lg:text-3xl font-bold text-white tracking-wide">
+              {activeTeam?.name}
+            </h2>
+            <span className="text-xs font-semibold text-brand-cyan px-2 py-0.5 rounded bg-brand-cyan/10 border border-brand-cyan/30">
+              Chặng 3 • Huy Động Vốn
+            </span>
+          </div>
+
+          {activeTeam?.slogan && (
+            <p className="mt-1 text-xs italic text-text-tertiary truncate">
+              &ldquo;{activeTeam?.slogan}&rdquo;
+            </p>
+          )}
+        </div>
+
+        {/* Complete Member List (Ensuring NO member is left out) */}
+        <div className="w-full space-y-2 pt-1">
+          <div className="text-[11px] uppercase tracking-wider text-text-tertiary font-bold flex items-center justify-between">
+            <span>Đội hình thành viên ({members.length})</span>
+            <span className="text-brand-cyan">{activeTeam?.institution}</span>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+            {members.map((m) => {
+              const isChosen = picker?.chosenMemberName === m.name
+              const isSpinningThis = picker?.isRolling && displayedMember?.name === m.name
+              return (
+                <div
+                  key={m.id}
+                  className={`px-3 py-2 rounded-lg border transition-all ${
+                    isChosen
+                      ? 'bg-yellow-500/20 border-yellow-400 text-yellow-300 shadow-[0_0_12px_rgba(234,179,8,0.3)]'
+                      : isSpinningThis
+                      ? 'bg-brand-cyan/20 border-brand-cyan text-brand-cyan animate-pulse'
+                      : 'bg-[#0A1120]/80 border-surface-border text-text-secondary'
+                  }`}
+                >
+                  <div className="flex items-center justify-between">
+                    <span className="font-display text-sm font-bold truncate text-text-primary">
+                      {m.name}
+                    </span>
+                    {m.role === 'leader' ? (
+                      <span className="text-[9px] font-sans font-semibold px-1.5 py-0.5 rounded bg-amber-500/20 text-amber-300 border border-amber-500/40 shrink-0">
+                        Trưởng nhóm
+                      </span>
+                    ) : (
+                      <span className="text-[9px] text-text-tertiary font-sans">Thành viên</span>
+                    )}
+                  </div>
+                  {m.faculty && (
+                    <div className="text-[10px] text-text-tertiary truncate mt-0.5">{m.faculty}</div>
+                  )}
+                </div>
+              )
+            })}
+          </div>
+        </div>
+      </div>
+
+      {/* Right Spotlight: The Roulette Result & Stage Call */}
+      <div className="lg:col-span-6 flex flex-col items-center justify-center p-8 lg:p-10 rounded-2xl bg-[#0A1120]/95 border border-surface-border/90 shadow-2xl relative min-h-[460px]">
+        {/* Subtle ambient light */}
+        <div
+          className={`absolute inset-0 pointer-events-none opacity-15 transition-colors duration-500 blur-2xl ${
+            picker?.chosenMemberName ? 'bg-yellow-400' : 'bg-brand-cyan'
+          }`}
+        />
+
+        <div className="relative z-10 w-full flex flex-col items-center justify-center text-center space-y-6">
+          {picker?.chosenMemberName ? (
+            /* WINNER SPOTLIGHT */
+            <motion.div
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              transition={{ type: 'spring', stiffness: 300, damping: 25 }}
+              className="flex flex-col items-center space-y-4 w-full"
+            >
+              <div className="inline-flex items-center gap-2 px-4 py-1 rounded-full bg-yellow-500/20 border border-yellow-400/60 text-yellow-400 text-xs font-bold uppercase tracking-wider">
+                <Trophy className="size-4 text-yellow-400" />
+                <span>Thành Viên Đại Diện Thuyết Trình</span>
+              </div>
+
+              <div className="py-2">
+                <h1 className="font-display text-4xl sm:text-5xl lg:text-6xl font-extrabold text-white tracking-wide">
+                  {picker.chosenMemberName}
+                </h1>
+                <div className="mt-2 text-sm text-brand-cyan font-medium">
+                  {picker.chosenMemberRole} • {picker.chosenMemberInstitution || activeTeam.institution}
+                </div>
+              </div>
+
+              {/* Timeline Rule Box */}
+              <div className="w-full max-w-md p-4 rounded-xl bg-surface-base border border-surface-border space-y-2 text-left">
+                <div className="text-xs uppercase font-bold text-text-tertiary">
+                  Quy định phần thi Chặng 3:
+                </div>
+                <div className="flex items-center justify-between text-xs border-t border-surface-border/60 pt-2">
+                  <span className="text-text-secondary">Thời gian chuẩn bị sân khấu:</span>
+                  <span className="font-bold font-mono text-brand-cyan">01 phút</span>
+                </div>
+                <div className="flex items-center justify-between text-xs border-t border-surface-border/60 pt-2">
+                  <span className="text-text-secondary">Thời gian thuyết trình Pitching:</span>
+                  <span className="font-bold font-mono text-yellow-400">05 phút</span>
+                </div>
+                <div className="flex items-center justify-between text-xs border-t border-surface-border/60 pt-2">
+                  <span className="text-text-secondary">Vấn đáp Ban Giám Khảo:</span>
+                  <span className="font-bold font-mono text-text-primary">05 phút</span>
+                </div>
+              </div>
+            </motion.div>
+          ) : picker?.isRolling ? (
+            /* SPINNING STATE */
+            <div className="flex flex-col items-center space-y-5 w-full">
+              <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-brand-cyan/20 border border-brand-cyan text-brand-cyan text-xs font-bold uppercase tracking-wider animate-pulse">
+                <span>Hệ Thống Đang Quay Chọn Ngẫu Nhiên</span>
+              </div>
+
+              <div className="w-full max-w-md px-6 py-8 rounded-2xl bg-surface-base border-2 border-brand-cyan/80 shadow-[0_0_30px_rgba(0,212,255,0.25)]">
+                <div className="font-display text-3xl sm:text-4xl lg:text-5xl font-bold text-white tracking-wide">
+                  {displayedMember?.name || 'Đang chọn...'}
+                </div>
+                <div className="mt-2 text-xs text-brand-cyan font-medium">
+                  {displayedMember?.institution || activeTeam.institution}
+                </div>
+              </div>
+
+              <p className="text-xs text-text-tertiary">
+                Vòng quay ngẫu nhiên các thành viên hợp lệ của đội {activeTeam?.name}...
+              </p>
+            </div>
+          ) : (
+            /* READY / IDLE STATE */
+            <div className="flex flex-col items-center space-y-4 w-full">
+              <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-surface-base border border-surface-border text-brand-cyan text-xs font-bold uppercase tracking-wider">
+                <Dices className="size-4" />
+                <span>Bốc Thăm Thành Viên Vòng 3</span>
+              </div>
+
+              <h3 className="font-display text-2xl sm:text-3xl font-bold text-white">
+                Sẵn Sàng Bốc Thăm Đại Diện
+              </h3>
+
+              <p className="text-xs text-text-tertiary max-w-md mx-auto leading-relaxed">
+                Ban Giám Khảo &amp; Ban Tổ Chức sẽ chọn ngẫu nhiên 01 trong 05 thành viên của đội {activeTeam?.name} để thực hiện bài báo cáo kế hoạch huy động vốn.
+              </p>
+
+              <div className="w-full max-w-md p-4 rounded-xl bg-surface-base border border-surface-border text-xs text-text-secondary text-left space-y-1.5">
+                <div className="font-bold text-text-primary">Quy định thời gian Chặng 3:</div>
+                <div>• Chuẩn bị: <span className="text-brand-cyan font-bold font-mono">01 phút</span></div>
+                <div>• Thuyết trình: <span className="text-yellow-400 font-bold font-mono">05 phút</span></div>
+                <div>• Vấn đáp BGK: <span className="text-text-primary font-bold font-mono">05 phút</span></div>
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+    </motion.div>
+  )
+}
+
 export default function FOHDisplayPage() {
   const [state, setState] = useState<FOHState>(INITIAL_FOH_STATE)
   const [fireworks, setFireworks] = useState(false)
+  const [timerSeconds, setTimerSeconds] = useState(
+    state.timer?.remainingSeconds ?? 300
+  )
   const timerRef = useRef<NodeJS.Timeout | null>(null)
+  const lastSfxSecRef = useRef<number | null>(null)
 
   const launchFireworks = useCallback((soundEnabled = true) => {
     setFireworks(true)
@@ -172,6 +402,43 @@ export default function FOHDisplayPage() {
     if (timerRef.current) clearTimeout(timerRef.current)
     timerRef.current = setTimeout(() => setFireworks(false), 5500)
   }, [])
+
+  // Synchronized Drift-Free Countdown Timer Loop
+  useEffect(() => {
+    const timer = state.timer
+    if (!timer) return
+
+    if (timer.mode !== 'RUNNING' || !timer.targetTimestamp) {
+      setTimerSeconds(timer.remainingSeconds)
+      lastSfxSecRef.current = null
+      return
+    }
+
+    const checkTick = () => {
+      const rem = Math.max(0, Math.ceil((timer.targetTimestamp! - Date.now()) / 1000))
+      setTimerSeconds(rem)
+
+      if (state.soundEnabled && timer.soundEnabled) {
+        if (rem === 60 && lastSfxSecRef.current !== 60) {
+          lastSfxSecRef.current = 60
+          playFOHSound('timer_warning', true)
+        } else if (rem === 30 && lastSfxSecRef.current !== 30) {
+          lastSfxSecRef.current = 30
+          playFOHSound('timer_warning', true)
+        } else if (rem <= 5 && rem >= 1 && lastSfxSecRef.current !== rem) {
+          lastSfxSecRef.current = rem
+          playFOHSound('timer_countdown', true)
+        } else if (rem === 0 && lastSfxSecRef.current !== 0) {
+          lastSfxSecRef.current = 0
+          playFOHSound('times_up', true)
+        }
+      }
+    }
+
+    checkTick()
+    const interval = setInterval(checkTick, 200)
+    return () => clearInterval(interval)
+  }, [state.timer, state.soundEnabled])
 
   useEffect(() => {
     if (typeof window === 'undefined') return
@@ -187,6 +454,8 @@ export default function FOHDisplayPage() {
           ...parsed,
           displayView: view,
           stageNames: parsed.stageNames || INITIAL_FOH_STATE.stageNames,
+          timer: parsed.timer || INITIAL_FOH_STATE.timer,
+          stage3Picker: parsed.stage3Picker || INITIAL_FOH_STATE.stage3Picker,
           teams: syncTeamRanks(parsed.teams, true, view),
         })
       } catch {
@@ -210,6 +479,8 @@ export default function FOHDisplayPage() {
             ...msg.state,
             displayView: view,
             stageNames: msg.state.stageNames || INITIAL_FOH_STATE.stageNames,
+            timer: msg.state.timer || INITIAL_FOH_STATE.timer,
+            stage3Picker: msg.state.stage3Picker || INITIAL_FOH_STATE.stage3Picker,
             teams: syncTeamRanks(msg.state.teams, true, view),
           })
           if (msg.sfx) playFOHSound(msg.sfx, msg.state.soundEnabled)
@@ -232,6 +503,8 @@ export default function FOHDisplayPage() {
             ...parsed,
             displayView: view,
             stageNames: parsed.stageNames || INITIAL_FOH_STATE.stageNames,
+            timer: parsed.timer || INITIAL_FOH_STATE.timer,
+            stage3Picker: parsed.stage3Picker || INITIAL_FOH_STATE.stage3Picker,
             teams: syncTeamRanks(parsed.teams, true, view),
           })
         } catch {
@@ -249,7 +522,15 @@ export default function FOHDisplayPage() {
     }
   }, [launchFireworks])
 
+  const isTimerView = state.displayView === 'TIMER'
   const isBoothView = state.displayView === 'BOOTH_VOTING'
+  const isStage3PickerView = state.displayView === 'STAGE3_PICKER'
+
+  const activeTimerTeam =
+    state.teams.find((t) => t.id === state.timer?.activeTeamId) || state.teams[0]
+  const activeStage3Team =
+    state.teams.find((t) => t.id === state.stage3Picker?.teamId) || state.teams[0]
+
   const rankedTeams = syncTeamRanks(state.teams, true, state.displayView)
   const totalBoothVotes = rankedTeams.reduce((acc, t) => acc + (t.boothVotes || 0), 0)
   const maxBoothVotes = Math.max(1, rankedTeams[0]?.boothVotes || 1)
@@ -263,6 +544,25 @@ export default function FOHDisplayPage() {
       ? `${state.stageNames.s2.toUpperCase()} • TỐI ĐA ${MAX_STAGE_SCORE} ĐIỂM`
       : `${state.stageNames.s3.toUpperCase()} • TỐI ĐA ${MAX_STAGE_SCORE} ĐIỂM`
 
+  // Timer calculations for display
+  const timerTotal = state.timer?.totalSeconds || 300
+  const timerRemaining = timerSeconds
+  const timerProgressPct =
+    timerTotal > 0
+      ? Math.max(0, Math.min(100, (timerRemaining / timerTotal) * 100))
+      : 0
+  const isTimerUrgent = timerRemaining <= 30 && timerRemaining > 0
+  const isTimerWarning = timerRemaining <= 60 && timerRemaining > 30
+  const isTimerFinished = timerRemaining === 0
+
+  const timerColor = isTimerFinished
+    ? '#EF4444'
+    : isTimerUrgent
+    ? '#EF4444'
+    : isTimerWarning
+    ? '#F59E0B'
+    : '#00D4FF'
+
   return (
     <div
       onDoubleClick={() => {
@@ -272,7 +572,7 @@ export default function FOHDisplayPage() {
           document.exitFullscreen().catch(() => {})
         }
       }}
-      className="relative min-h-screen w-full bg-[#050814] text-text-primary overflow-hidden select-none flex flex-col justify-between px-6 py-5 md:px-12 md:py-6 bg-cover bg-center bg-no-repeat"
+      className="relative min-h-screen w-full bg-[#050814] text-text-primary overflow-hidden select-none flex flex-col justify-between px-6 py-5 md:px-12 md:py-6 bg-cover bg-center bg-no-repeat font-sans"
       style={{
         backgroundImage: `linear-gradient(to bottom, rgba(5, 8, 20, 0.5) 0%, rgba(5, 8, 20, 0.72) 45%, rgba(5, 8, 20, 0.88) 100%), url('/images/foh-bg.jpg')`,
       }}
@@ -280,9 +580,9 @@ export default function FOHDisplayPage() {
       <FireworksOverlay active={fireworks} />
 
       {/* Stage Header */}
-      <header className="relative z-10 flex flex-col items-center text-center space-y-1.5 shrink-0">
-        <div className="flex flex-wrap items-center justify-center gap-2.5">
-          <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-[#0B132B]/85 backdrop-blur-md border border-brand-cyan/40 text-brand-cyan text-xs font-mono uppercase tracking-wider shadow-sm">
+      <header className="relative z-10 flex flex-col items-center text-center space-y-2 shrink-0">
+        <div className="flex flex-wrap items-center justify-center gap-2">
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#0B132B]/90 border border-brand-cyan/40 text-brand-cyan text-xs font-semibold uppercase tracking-wider">
             <Image
               src="/logo/gendarena-logo.png"
               alt="GenD Arena 2026"
@@ -290,14 +590,24 @@ export default function FOHDisplayPage() {
               height={16}
               className="object-contain"
             />
-            <span>{state.roundName}</span>
+            <span>GEN D ARENA 2026 • CHUNG KẾT TOÀN QUỐC</span>
           </div>
 
-          <div className="inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full bg-brand-navy/90 backdrop-blur-md border border-brand-cyan/60 text-text-primary text-xs font-mono font-semibold shadow-sm">
-            {isBoothView ? (
+          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-brand-navy/90 border border-brand-cyan/60 text-text-primary text-xs font-semibold">
+            {isTimerView ? (
+              <>
+                <Timer className="size-3.5 text-brand-cyan" />
+                <span>ĐỒNG HỒ THI ĐẤU TRỰC TIẾP</span>
+              </>
+            ) : isStage3PickerView ? (
+              <>
+                <Dices className="size-3.5 text-brand-cyan" />
+                <span>VÒNG 3 • BỐC THĂM ĐẠI DIỆN THUYẾT TRÌNH</span>
+              </>
+            ) : isBoothView ? (
               <>
                 <Vote className="size-3.5 text-brand-cyan" />
-                <span>TỔNG SỐ PHIẾU HỢP LỆ: {totalBoothVotes.toLocaleString('vi-VN')} PHIẾU</span>
+                <span>BẢNG ĐIỂM GIAN HÀNG ({totalBoothVotes.toLocaleString('vi-VN')} PHIẾU)</span>
               </>
             ) : (
               <>
@@ -308,16 +618,28 @@ export default function FOHDisplayPage() {
           </div>
         </div>
 
-        <h1 className="font-display text-2xl md:text-4xl lg:text-5xl font-bold text-text-primary tracking-tight drop-shadow-[0_4px_16px_rgba(0,0,0,0.8)]">
-          {isBoothView ? state.boothTitle : state.title}
+        <h1 className="font-display text-2xl md:text-4xl lg:text-5xl font-bold text-white tracking-tight drop-shadow-[0_2px_12px_rgba(0,0,0,0.8)]">
+          {isTimerView
+            ? state.timer?.roundLabel || 'Đồng Hồ Thi Đấu Trực Tiếp'
+            : isStage3PickerView
+            ? 'Bốc Thăm Thành Viên Thuyết Trình Vòng 3'
+            : isBoothView
+            ? state.boothTitle
+            : state.title}
         </h1>
 
-        <p className="text-xs md:text-sm text-text-secondary drop-shadow-[0_2px_8px_rgba(0,0,0,0.8)]">
-          {isBoothView ? state.boothSubtitle : state.subtitle}
+        <p className="text-xs md:text-sm text-text-secondary">
+          {isTimerView
+            ? `Đang thi đấu: ${activeTimerTeam?.name} (#${activeTimerTeam?.msbc}) • ${activeTimerTeam?.institution}`
+            : isStage3PickerView
+            ? `Đội thi: ${activeStage3Team?.name} (#${activeStage3Team?.msbc}) • Kế hoạch huy động vốn`
+            : isBoothView
+            ? state.boothSubtitle
+            : state.subtitle}
         </p>
       </header>
 
-      {/* Stage Body: Curtain or Live Leaderboard */}
+      {/* Stage Body: Curtain, Fullscreen Stage Timer, Stage 3 Member Picker, or Live Leaderboard */}
       <AnimatePresence mode="wait">
         {state.isHidden ? (
           <motion.div
@@ -332,9 +654,144 @@ export default function FOHDisplayPage() {
             <h2 className="font-display text-2xl md:text-4xl font-bold text-center text-text-primary">
               {state.hiddenMessage}
             </h2>
-            <p className="mt-3 text-sm font-mono text-text-secondary uppercase tracking-wider">
+            <p className="mt-3 text-sm text-text-secondary uppercase tracking-wider font-medium">
               Hệ thống đang khóa hiển thị bảng điểm tạm thời
             </p>
+          </motion.div>
+        ) : isStage3PickerView ? (
+          <Stage3MemberPickerView key="stage3-picker" state={state} />
+        ) : isTimerView ? (
+          <motion.div
+            key="fullscreen-timer"
+            initial={{ opacity: 0, scale: 0.98 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.98 }}
+            transition={{ duration: 0.25 }}
+            className="relative z-20 my-auto max-w-7xl mx-auto w-full grid grid-cols-1 lg:grid-cols-12 gap-8 items-center py-2"
+          >
+            {/* Left Spotlight: Full-size 3:2 Team Photo & All 5 Members */}
+            <div className="lg:col-span-6 flex flex-col items-center lg:items-start text-left space-y-3">
+              <div className="relative w-full aspect-[3/2] rounded-2xl overflow-hidden border border-brand-cyan/40 bg-black/70 shadow-2xl">
+                <Image
+                  src={activeTimerTeam?.posterUrl || '/images/teams/aqua-radar.webp'}
+                  alt={activeTimerTeam?.name || 'Đội thi'}
+                  fill
+                  sizes="(max-width: 1024px) 100vw, 640px"
+                  className="object-contain object-center"
+                  priority
+                />
+                <div className="absolute top-3 left-3 px-3 py-1 rounded bg-black/80 backdrop-blur-md border border-brand-cyan/60 font-mono text-xs font-bold text-brand-cyan">
+                  MSBC #{activeTimerTeam?.msbc}
+                </div>
+                <div className="absolute bottom-3 left-3 right-3 px-3 py-1.5 rounded-lg bg-black/85 backdrop-blur-md border border-white/10 text-xs text-text-secondary truncate font-medium">
+                  {activeTimerTeam?.institution}
+                </div>
+              </div>
+
+              <div className="w-full">
+                <h2 className="font-display text-2xl lg:text-3xl font-bold text-white tracking-wide">
+                  {activeTimerTeam?.name}
+                </h2>
+                {activeTimerTeam?.slogan && (
+                  <p className="mt-1 text-xs italic text-text-tertiary truncate">
+                    &ldquo;{activeTimerTeam?.slogan}&rdquo;
+                  </p>
+                )}
+              </div>
+
+              {/* Complete Member List (Ensuring no member is hidden) */}
+              <div className="w-full space-y-2 pt-1">
+                <div className="text-[11px] uppercase tracking-wider text-text-tertiary font-bold">
+                  Thành viên đội ({activeTimerTeam?.members?.length || 5})
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                  {(activeTimerTeam?.members || []).map((m) => (
+                    <div
+                      key={m.id}
+                      className="px-3 py-1.5 rounded-lg bg-[#0A1120]/80 border border-surface-border flex items-center justify-between text-xs"
+                    >
+                      <span className="font-semibold text-text-primary truncate">{m.name}</span>
+                      {m.role === 'leader' ? (
+                        <span className="text-[9px] font-sans font-semibold px-1.5 py-0.5 rounded bg-amber-500/20 text-amber-300 border border-amber-500/40 shrink-0">
+                          Trưởng nhóm
+                        </span>
+                      ) : (
+                        <span className="text-[9px] text-text-tertiary font-sans">Thành viên</span>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            {/* Right Spotlight: Huge Clean Broadcast Countdown Clock */}
+            <div className="lg:col-span-6 flex flex-col items-center justify-center p-8 lg:p-12 rounded-2xl bg-[#0A1120]/95 border border-surface-border shadow-2xl relative overflow-hidden">
+              <div className="relative z-10 inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-surface-base border border-brand-cyan/40 text-text-primary text-xs sm:text-sm font-semibold mb-6">
+                <Clock className="size-4 text-brand-cyan" />
+                <span>{state.timer?.roundLabel || 'Vòng Thi Đấu Chung Kết'}</span>
+              </div>
+
+              <div className="relative z-10 flex flex-col items-center">
+                <div
+                  className={`font-mono text-8xl sm:text-9xl font-bold tracking-widest tabular-nums leading-none select-none transition-colors duration-200 ${
+                    isTimerUrgent ? 'animate-pulse' : ''
+                  }`}
+                  style={{
+                    color: timerColor,
+                    textShadow: `0 0 40px ${timerColor}44`,
+                  }}
+                >
+                  {formatTimerSeconds(timerRemaining)}
+                </div>
+
+                <div className="mt-6 flex items-center gap-2">
+                  {state.timer?.mode === 'RUNNING' && timerRemaining > 0 && (
+                    <span className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-emerald-500/15 border border-emerald-500/40 text-emerald-400 text-xs font-bold font-sans">
+                      <span className="size-2 rounded-full bg-emerald-400 animate-ping" />
+                      <span>ĐANG TÍNH GIỜ THI ĐẤU</span>
+                    </span>
+                  )}
+                  {state.timer?.mode === 'PAUSED' && (
+                    <span className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full bg-amber-500/15 border border-amber-500/40 text-amber-400 text-xs font-bold font-sans">
+                      <Pause className="size-3.5" />
+                      <span>TẠM DỪNG THỜI GIAN</span>
+                    </span>
+                  )}
+                  {isTimerFinished && (
+                    <span className="inline-flex items-center gap-1.5 px-5 py-2 rounded-full bg-red-500/20 border border-red-500 text-red-400 text-sm font-bold font-sans">
+                      <AlertTriangle className="size-4" />
+                      <span>HẾT GIỜ THI ĐẤU</span>
+                    </span>
+                  )}
+                  {state.timer?.mode === 'STOPPED' && timerRemaining > 0 && (
+                    <span className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full bg-surface-base border border-surface-border text-text-tertiary text-xs font-bold font-sans">
+                      <span>CHỜ BẮT ĐẦU</span>
+                    </span>
+                  )}
+                </div>
+              </div>
+
+              {/* Progress bar */}
+              <div className="relative z-10 w-full mt-8">
+                <div className="flex items-center justify-between text-xs font-mono text-text-tertiary mb-2">
+                  <span>Tiến độ thời gian thi đấu</span>
+                  <span className="font-bold text-text-primary">{timerProgressPct.toFixed(0)}% còn lại</span>
+                </div>
+                <div className="h-2.5 w-full rounded-full bg-surface-base border border-surface-border overflow-hidden p-0.5">
+                  <div
+                    className="h-full rounded-full transition-all duration-300 ease-out"
+                    style={{
+                      width: `${timerProgressPct}%`,
+                      background: isTimerUrgent
+                        ? '#EF4444'
+                        : isTimerWarning
+                        ? '#F59E0B'
+                        : '#00D4FF',
+                    }}
+                  />
+                </div>
+              </div>
+            </div>
           </motion.div>
         ) : (
           <motion.main
@@ -344,6 +801,37 @@ export default function FOHDisplayPage() {
             exit={{ opacity: 0 }}
             className="relative z-10 my-auto max-w-6xl w-full mx-auto space-y-2.5 lg:space-y-3 py-2"
           >
+            {/* Optional Floating Mini Stage Timer Banner above scoreboard */}
+            {state.timer?.showOverlayOnScoreboard &&
+              state.timer.mode !== 'STOPPED' && (
+                <div className="relative z-10 mb-2 py-2 px-4 rounded-xl bg-[#0B132B]/90 border border-brand-cyan/50 backdrop-blur-md flex items-center justify-between shadow-[0_0_20px_rgba(0,212,255,0.15)]">
+                  <div className="flex items-center gap-2.5 min-w-0">
+                    <span className="size-2 rounded-full bg-emerald-400 animate-ping shrink-0" />
+                    <span className="font-mono text-xs font-bold text-brand-cyan uppercase tracking-wider shrink-0">
+                      TIMELINE:
+                    </span>
+                    <span className="font-display text-sm font-bold text-text-primary truncate">
+                      {activeTimerTeam?.name || 'Đội thi đấu'}
+                    </span>
+                    <span className="text-xs text-text-tertiary truncate hidden sm:inline">
+                      • {state.timer?.roundLabel}
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-3 shrink-0">
+                    <span
+                      className={`font-mono text-xl sm:text-2xl font-bold tracking-wider tabular-nums ${
+                        timerRemaining <= 30 && timerRemaining > 0
+                          ? 'text-red-400 animate-pulse'
+                          : timerRemaining <= 60
+                          ? 'text-amber-400'
+                          : 'text-brand-cyan'
+                      }`}
+                    >
+                      ⏱️ {formatTimerSeconds(timerRemaining)}
+                    </span>
+                  </div>
+                </div>
+              )}
             {rankedTeams.map((team) => {
               const currentRank = isBoothView ? team.boothRank : team.rank
               const prevRank = isBoothView ? team.prevBoothRank : team.prevRank
@@ -386,14 +874,14 @@ export default function FOHDisplayPage() {
                     {/* 1. Synchronized Rank Badge (Fixed Width) */}
                     <StageRankBadge rank={currentRank} hasScore={hasScore} />
 
-                    {/* 2. Team Poster Thumbnail (Fixed Size) */}
-                    <div className="relative size-12 lg:size-14 rounded-lg overflow-hidden border border-surface-border bg-surface-overlay shrink-0 shadow-sm">
+                    {/* 2. Team Poster Thumbnail (Full-View Landscape 3:2) */}
+                    <div className="relative w-24 sm:w-28 lg:w-36 aspect-[3/2] rounded-lg overflow-hidden border border-surface-border bg-black/60 shrink-0 shadow-sm">
                       <Image
                         src={team.posterUrl}
                         alt={team.name}
                         fill
-                        sizes="56px"
-                        className="object-cover"
+                        sizes="160px"
+                        className="object-contain object-center"
                       />
                     </div>
 
@@ -403,7 +891,7 @@ export default function FOHDisplayPage() {
                         <span className="px-2 py-0.5 rounded bg-brand-cyan/15 border border-brand-cyan/30 font-mono text-[11px] lg:text-xs font-bold text-brand-cyan shrink-0">
                           {isBoothView ? `Gian hàng #${team.msbc}` : `Đội #${team.msbc}`}
                         </span>
-                        <span className="text-[11px] lg:text-xs font-mono text-text-tertiary truncate max-w-[200px] sm:max-w-xs md:max-w-sm">
+                        <span className="text-[11px] lg:text-xs text-text-secondary truncate max-w-[200px] sm:max-w-xs md:max-w-sm">
                           {team.institution}
                         </span>
                         {rankDiff > 0 && (
@@ -419,9 +907,19 @@ export default function FOHDisplayPage() {
                         )}
                       </div>
 
-                      <h3 className="font-display text-lg lg:text-2xl font-bold text-text-primary truncate">
+                      <h3 className="font-display text-lg lg:text-2xl font-bold text-white truncate">
                         {team.name}
                       </h3>
+
+                      {/* Complete Team Members (Leader + all members) */}
+                      <div className="text-[11px] text-text-tertiary truncate max-w-sm sm:max-w-md lg:max-w-xl mt-0.5 font-sans">
+                        <span className="text-brand-cyan font-semibold">Trưởng nhóm: {team.leaderName}</span>
+                        {team.members && team.members.length > 0 && (
+                          <span>
+                            {' • '}Thành viên: {team.members.filter((m) => m.role !== 'leader').map((m) => m.name).join(', ')}
+                          </span>
+                        )}
+                      </div>
 
                       {/* Progress Bar under name */}
                       <div
@@ -505,19 +1003,13 @@ export default function FOHDisplayPage() {
       </AnimatePresence>
 
       {/* Stage Footer */}
-      <footer className="relative z-10 flex items-center justify-between text-[11px] lg:text-xs font-mono text-text-tertiary border-t border-surface-border/80 pt-2.5 shrink-0 bg-[#050814]/40 backdrop-blur-sm -mx-6 -mb-5 px-6 pb-2.5 md:-mx-12 md:-mb-6 md:px-12">
+      <footer className="relative z-10 flex items-center justify-between text-[11px] lg:text-xs text-text-tertiary border-t border-surface-border/80 pt-2.5 shrink-0 bg-[#050814]/60 backdrop-blur-sm -mx-6 -mb-5 px-6 pb-2.5 md:-mx-12 md:-mb-6 md:px-12 font-medium">
         <div className="flex items-center gap-2">
           <ShieldCheck className="size-3.5 text-brand-cyan" />
-          <span>
-            GEND ARENA 2026 •{' '}
-            {isBoothView
-              ? 'OFFICIAL BOOTH VOTING LEADERBOARD (TOP 5)'
-              : 'GRAND FINALE 3-STAGE SCOREBOARD (MAX 150 PTS)'}
-          </span>
+          <span>GEND ARENA 2026 • CHUNG KẾT TOÀN QUỐC</span>
         </div>
-        <div className="flex items-center gap-1.5">
-          <Maximize2 className="size-3.5" />
-          <span>NHẤP ĐÚP CHUỘT ĐỂ BẬT TOÀN MÀN HÌNH (FULLSCREEN)</span>
+        <div className="flex items-center gap-1.5 text-text-tertiary">
+          <span>HỘI ĐỒNG BAN GIÁM KHẢO &amp; BAN TỔ CHỨC</span>
         </div>
       </footer>
     </div>

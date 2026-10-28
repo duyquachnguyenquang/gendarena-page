@@ -27,7 +27,7 @@ export default function FOHPortalPage() {
   }
 
   return (
-    <div className="relative min-h-screen bg-surface-base text-text-primary flex flex-col justify-between overflow-hidden select-none">
+    <div className="relative min-h-screen bg-surface-base text-text-primary flex flex-col justify-between overflow-hidden select-none font-sans">
       <div className="absolute inset-0 z-0 overflow-hidden pointer-events-none" aria-hidden="true">
         <DotGridBackground />
         <div className="absolute -top-32 left-1/2 -translate-x-1/2 w-[650px] h-96 rounded-full bg-brand-cyan/5 blur-[150px]" />
@@ -53,7 +53,7 @@ export default function FOHPortalPage() {
             </Badge>
           </div>
 
-          <div className="flex items-center gap-2 text-xs font-mono text-semantic-success">
+          <div className="flex items-center gap-2 text-xs font-semibold text-semantic-success">
             <Radio className="size-3.5" />
             <span>Offline-First BroadcastChannel</span>
           </div>
@@ -63,7 +63,7 @@ export default function FOHPortalPage() {
       {/* Main Content */}
       <main className="relative z-10 mx-auto max-w-5xl w-full px-6 py-12 space-y-10 my-auto">
         <div className="text-center space-y-3 max-w-3xl mx-auto">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-surface-raised border border-surface-border text-xs font-mono text-brand-cyan">
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-surface-raised border border-surface-border text-xs font-semibold text-brand-cyan">
             <Trophy className="size-3.5" />
             <span>ĐÊM CHUNG KẾT GEND ARENA: DEVELOP • TOP 5 CHUNG KẾT</span>
           </div>
@@ -141,7 +141,7 @@ export default function FOHPortalPage() {
         {/* Official Top 5 Finalists Preview */}
         <div className="bg-surface-overlay border border-surface-border rounded-xl p-5 space-y-3">
           <div className="flex flex-wrap items-center justify-between gap-2">
-            <div className="flex items-center gap-2 text-xs font-mono text-text-secondary">
+            <div className="flex items-center gap-2 text-xs font-semibold text-text-secondary">
               <ShieldCheck className="size-4 text-brand-cyan" />
               <span>DANH SÁCH 5 ĐỘI THI CHUNG KẾT ĐÃ ĐƯỢC TÍCH HỢP SẴN (OFFLINE READY)</span>
             </div>
