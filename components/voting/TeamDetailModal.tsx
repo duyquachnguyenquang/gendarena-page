@@ -18,6 +18,7 @@ import {
   GraduationCap,
 } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
+import { Button } from '@/components/ui/button'
 import { TeamVote, VotingPhaseStatus } from '@/types/voting'
 import EventistaLogo from './EventistaLogo'
 

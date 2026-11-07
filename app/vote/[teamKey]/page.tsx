@@ -3,8 +3,8 @@ import type { Metadata } from 'next'
 import { notFound } from 'next/navigation'
 import {
   resolveBoothTeam,
-  getBoothVotingDashboardData,
-  evaluateBoothGateStatus,
+  getFastGateStatus,
+  getFastGateSettings,
 } from '@/lib/booth-voting'
 import BoothVoteClient from '../booth/[teamKey]/booth-vote-client'
 
@@ -26,7 +26,7 @@ export async function generateMetadata({
 
   return {
     title: `Bình chọn Đội #${team.msbc} ${team.name} — Chung Kết GenD Arena 2026`,
-    description: `Bình chọn trực tiếp cho gian hàng đội ${team.name} (${team.institution}) tại Vòng Chung Kết GenD Arena 2026 (14:00 – 15:30 ngày 08/11/2026).`,
+    description: `Bình chọn trực tiếp cho gian hàng đội ${team.name} (${team.institution}) tại Vòng Chung Kết GenD Arena 2026 (15:30 – 16:30 ngày 08/11/2026).`,
     openGraph: {
       title: `Bình chọn Gian hàng #${team.msbc}: ${team.name} — GenD Arena 2026`,
       description: team.summary,
@@ -48,16 +48,17 @@ export default async function DirectTeamVoteAliasPage({
     notFound()
   }
 
-  const dashboard = await getBoothVotingDashboardData()
-  const gate = evaluateBoothGateStatus(dashboard.settings)
+  // Fast-path: Zero DB queries during QR scan page loading (100% in-memory cache)
+  const gate = getFastGateStatus()
+  const settings = getFastGateSettings()
 
   return (
     <BoothVoteClient
       team={team}
       initialGate={gate}
       initialSettings={{
-        start_time: dashboard.settings.start_time,
-        end_time: dashboard.settings.end_time,
+        start_time: settings.start_time,
+        end_time: settings.end_time,
       }}
     />
   )

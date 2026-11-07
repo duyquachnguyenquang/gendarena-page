@@ -37,7 +37,8 @@ import {
   Sparkles,
   Wifi,
   Globe,
-  Laptop,
+  Trash2,
+  AlertTriangle,
 } from 'lucide-react'
 
 const PRODUCTION_ORIGIN = 'https://gendarena.com'
@@ -100,24 +101,43 @@ export default function AdminBoothVotingPage() {
   const [totalBlocked, setTotalBlocked] = useState(0)
   const [lastSyncedAt, setLastSyncedAt] = useState<string>('')
   const [copiedKey, setCopiedKey] = useState<string | null>(null)
-  const [localOrigin, setLocalOrigin] = useState<string>('http://localhost:3000')
-  const [isLocalEnv, setIsLocalEnv] = useState<boolean>(false)
-  // Default QR code always encodes production https://gendarena.com so printed QR standees never accidentally contain localhost
-  const [qrTargetEnv, setQrTargetEnv] = useState<'PROD' | 'LOCAL'>('PROD')
+  const [justVotedTeamId, setJustVotedTeamId] = useState<string | null>(null)
+  const [sseConnected, setSseConnected] = useState<boolean>(false)
+  const [resettingData, setResettingData] = useState<boolean>(false)
 
-  useEffect(() => {
-    if (typeof window !== 'undefined' && window.location?.origin) {
-      const currentOrigin = window.location.origin
-      const isLocal =
-        currentOrigin.includes('localhost') ||
-        currentOrigin.includes('127.0.0.1') ||
-        currentOrigin.includes('192.168.')
-      setIsLocalEnv(isLocal)
-      if (isLocal) {
-        setLocalOrigin(currentOrigin)
+  const handleResetTestData = async () => {
+    const confirmed = window.confirm(
+      'XÁC NHẬN: Bạn có chắc chắn muốn xóa toàn bộ dữ liệu bình chọn thử nghiệm không?\n\n' +
+        '• Toàn bộ điểm số của TOP 5 đội sẽ được đưa về 0.\n' +
+        '• Cổng bình chọn sẽ được đặt về Tự Động (15:30 – 16:30, 08/11/2026).\n' +
+        '• Thao tác này sẽ dọn sạch toàn bộ cache và phiếu thử nghiệm.'
+    )
+    if (!confirmed) return
+
+    setResettingData(true)
+    try {
+      const res = await fetch('/api/admin/booth-voting', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'reset_data' }),
+      })
+      const data = await res.json()
+      if (!res.ok) {
+        alert(data.error || 'Có lỗi xảy ra khi xóa dữ liệu test.')
+        return
       }
+      if (data.settings) setSettings(data.settings)
+      if (data.gate) setGate(data.gate)
+      if (data.teams) setTeams(data.teams)
+      setTotalVotes(0)
+      setTotalBlocked(0)
+      alert('Đã xóa toàn bộ dữ liệu test thành công! Toàn bộ điểm số TOP 5 đã trở về 0.')
+    } catch {
+      alert('Không thể kết nối máy chủ để xóa dữ liệu test.')
+    } finally {
+      setResettingData(false)
     }
-  }, [])
+  }
 
   const fetchDashboard = useCallback(async () => {
     try {
@@ -147,9 +167,10 @@ export default function AdminBoothVotingPage() {
     }
   }, [router])
 
-  // Initial auth check + Realtime subscription + 3-second fallback sync
+  // Multi-tier Real-time: SSE Stream (<50ms push) + Supabase Realtime + Polling Backup
   useEffect(() => {
     let isMounted = true
+    let eventSource: EventSource | null = null
 
     async function init() {
       const {
@@ -161,6 +182,94 @@ export default function AdminBoothVotingPage() {
         return
       }
       await fetchDashboard()
+      setupSse()
+    }
+
+    function setupSse() {
+      if (!isMounted) return
+      try {
+        eventSource = new EventSource('/api/admin/booth-voting/stream')
+
+        eventSource.onopen = () => {
+          if (isMounted) setSseConnected(true)
+        }
+
+        eventSource.addEventListener('init', (e: MessageEvent) => {
+          if (!isMounted || !e.data) return
+          try {
+            const data = JSON.parse(e.data)
+            if (data.teams) setTeams(data.teams)
+            if (data.settings) setSettings(data.settings)
+            if (data.gate) setGate(data.gate)
+            if (typeof data.totalVotes === 'number') setTotalVotes(data.totalVotes)
+            if (typeof data.totalBlocked === 'number') setTotalBlocked(data.totalBlocked)
+            setLastSyncedAt(
+              new Date().toLocaleTimeString('vi-VN', {
+                hour: '2-digit',
+                minute: '2-digit',
+                second: '2-digit',
+              })
+            )
+          } catch {}
+        })
+
+        eventSource.addEventListener('message', (e: MessageEvent) => {
+          if (!isMounted || !e.data) return
+          try {
+            const event = JSON.parse(e.data)
+            if (event.type === 'VOTE_RECORDED' && event.teamId) {
+              setJustVotedTeamId(event.teamId)
+              setTimeout(() => {
+                if (isMounted) {
+                  setJustVotedTeamId((current) => (current === event.teamId ? null : current))
+                }
+              }, 2200)
+
+              setTeams((prevTeams) =>
+                prevTeams.map((t) =>
+                  t.team_id === event.teamId
+                    ? {
+                        ...t,
+                        vote_count: event.voteCount ?? t.vote_count + 1,
+                        last_vote_at: event.lastVoteAt || new Date().toISOString(),
+                      }
+                    : t
+                )
+              )
+              setTotalVotes((v) => v + 1)
+              setLastSyncedAt(
+                new Date().toLocaleTimeString('vi-VN', {
+                  hour: '2-digit',
+                  minute: '2-digit',
+                  second: '2-digit',
+                })
+              )
+            } else if (event.type === 'BLOCKED_RECORDED' && event.teamId) {
+              setTeams((prevTeams) =>
+                prevTeams.map((t) =>
+                  t.team_id === event.teamId
+                    ? {
+                        ...t,
+                        blocked_count: (t.blocked_count || 0) + 1,
+                      }
+                    : t
+                )
+              )
+              setTotalBlocked((b) => b + 1)
+            } else if (event.type === 'SETTINGS_UPDATED' && event.settings) {
+              setSettings(event.settings)
+            }
+          } catch {}
+        })
+
+        eventSource.onerror = () => {
+          if (isMounted) setSseConnected(false)
+          eventSource?.close()
+          setTimeout(() => {
+            if (isMounted) setupSse()
+          }, 2500)
+        }
+      } catch {}
     }
 
     init()
@@ -181,14 +290,36 @@ export default function AdminBoothVotingPage() {
           fetchDashboard()
         }
       )
+      .on(
+        'broadcast',
+        { event: 'VOTE_LIVE' },
+        (payload: any) => {
+          const event = payload.payload
+          if (event && event.type === 'VOTE_RECORDED' && event.teamId) {
+            setJustVotedTeamId(event.teamId)
+            setTimeout(() => {
+              if (isMounted) setJustVotedTeamId((cur) => (cur === event.teamId ? null : cur))
+            }, 2200)
+            setTeams((prev) =>
+              prev.map((t) =>
+                t.team_id === event.teamId
+                  ? { ...t, vote_count: event.voteCount ?? t.vote_count + 1 }
+                  : t
+              )
+            )
+            setTotalVotes((v) => v + 1)
+          }
+        }
+      )
       .subscribe()
 
     const pollTimer = setInterval(() => {
       fetchDashboard()
-    }, 3000)
+    }, 4000)
 
     return () => {
       isMounted = false
+      eventSource?.close()
       clearInterval(pollTimer)
       supabase.removeChannel(channel)
     }
@@ -224,15 +355,9 @@ export default function AdminBoothVotingPage() {
     []
   )
 
-  const getLocalVoteUrl = useCallback(
-    (team: BoothTeamScoreRow) => `${localOrigin}/vote/booth/${team.slug}`,
-    [localOrigin]
-  )
-
   const getActiveQrUrl = useCallback(
-    (team: BoothTeamScoreRow) =>
-      qrTargetEnv === 'LOCAL' && isLocalEnv ? getLocalVoteUrl(team) : getProdVoteUrl(team),
-    [getLocalVoteUrl, getProdVoteUrl, isLocalEnv, qrTargetEnv]
+    (team: BoothTeamScoreRow) => getProdVoteUrl(team),
+    [getProdVoteUrl]
   )
 
   const handleCopyText = async (key: string, text: string) => {
@@ -320,7 +445,7 @@ export default function AdminBoothVotingPage() {
 
     ctx.fillStyle = '#00F0FF'
     ctx.font = 'bold 32px monospace'
-    ctx.fillText('Khung giờ: 14:00 – 15:30 | Ngày 08/11/2026', 600, 1365)
+    ctx.fillText('Khung giờ: 15:30 – 16:30 | Ngày 08/11/2026', 600, 1365)
 
     ctx.fillStyle = '#94A3B8'
     ctx.font = '26px monospace'
@@ -396,8 +521,8 @@ export default function AdminBoothVotingPage() {
                   BTC • TOP 5 CHUNG KẾT (08/11/2026)
                 </Badge>
                 <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-brand-cyan/15 border border-brand-cyan/30 text-brand-cyan text-xs font-mono">
-                  <Radio className="size-3 animate-pulse" />
-                  Real-time Sync ({lastSyncedAt})
+                  <Radio className={`size-3 ${sseConnected ? 'text-semantic-success animate-pulse' : 'animate-pulse'}`} />
+                  {sseConnected ? 'SSE Live Stream (<50ms)' : 'Real-time Sync'} ({lastSyncedAt})
                 </span>
                 {gate?.isOpen ? (
                   <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-semantic-success/15 border border-semantic-success/40 text-semantic-success text-xs font-mono font-bold">
@@ -416,11 +541,20 @@ export default function AdminBoothVotingPage() {
                 Điều Hành Voting Gian Hàng Top 5 Chung Kết
               </h1>
               <p className="mt-1 text-xs sm:text-sm text-text-secondary">
-                Top 5: <strong>Aqua Radar, Axiom, Viet Nam Safe, Ngũ Long Công Chúa, Change yourself</strong> • 14:00 – 15:30 ngày 08/11/2026
+                Top 5: <strong>Aqua Radar, Axiom, Viet Nam Safe, Ngũ Long Công Chúa, Change yourself</strong> • 15:30 – 16:30 ngày 08/11/2026
               </p>
             </div>
 
             <div className="flex flex-wrap items-center gap-2">
+              <Button
+                variant="danger"
+                size="sm"
+                disabled={resettingData}
+                onClick={handleResetTestData}
+                leftIcon={<Trash2 className="size-3.5" />}
+              >
+                {resettingData ? 'Đang xóa...' : 'Xóa dữ liệu test (Reset 0)'}
+              </Button>
               <Button
                 variant="secondary"
                 size="sm"
@@ -520,30 +654,26 @@ export default function AdminBoothVotingPage() {
             </div>
             <p className="font-display text-lg font-bold text-text-primary mt-2">
               {settings?.gate_mode === 'force_open'
-                ? 'Đang Mở Cưỡng Bức (Test/Live)'
+                ? 'Đang Mở Thủ Công (Manual Open)'
                 : settings?.gate_mode === 'force_closed'
                 ? 'Đã Khóa Cưỡng Bức'
-                : 'Tự Động (14:00–15:30 08/11)'}
+                : 'Tự Động (15:30–16:30 08/11)'}
             </p>
             <div className="mt-2 flex items-center gap-2">
-              {settings?.gate_mode !== 'force_open' ? (
-                <button
-                  type="button"
-                  disabled={savingSettings}
-                  onClick={() => handleUpdateSettings({ gate_mode: 'force_open' })}
-                  className="text-[11px] font-mono px-2.5 py-1 rounded bg-semantic-success/20 text-semantic-success border border-semantic-success/40 hover:bg-semantic-success/30 cursor-pointer"
-                >
-                  Mở cổng ngay (Để Test)
-                </button>
-              ) : (
+              {settings?.gate_mode !== 'auto' ? (
                 <button
                   type="button"
                   disabled={savingSettings}
                   onClick={() => handleUpdateSettings({ gate_mode: 'auto' })}
                   className="text-[11px] font-mono px-2.5 py-1 rounded bg-semantic-warning/20 text-semantic-warning border border-semantic-warning/40 hover:bg-semantic-warning/30 cursor-pointer"
                 >
-                  Về chế độ Tự động (08/11)
+                  Về chế độ Tự động (15:30 – 16:30)
                 </button>
+              ) : (
+                <span className="text-[11px] font-mono text-text-tertiary flex items-center gap-1.5">
+                  <span className="size-1.5 rounded-full bg-semantic-warning animate-pulse" />
+                  Đang hẹn giờ: Khởi động lúc 15:30
+                </span>
               )}
             </div>
           </Card>
@@ -590,11 +720,15 @@ export default function AdminBoothVotingPage() {
                     ? Math.max(4, Math.round((team.vote_count / maxVotes) * 100))
                     : 0
 
+                const isJustVoted = justVotedTeamId === team.team_id
+
                 return (
                   <div
                     key={team.team_id}
-                    className={`px-6 py-4 transition-colors hover:bg-surface-raised/30 ${
-                      idx === 0 && team.vote_count > 0
+                    className={`px-6 py-4 transition-all duration-300 hover:bg-surface-raised/30 ${
+                      isJustVoted
+                        ? 'bg-brand-cyan/20 ring-2 ring-brand-cyan shadow-[0_0_25px_rgba(0,240,255,0.45)]'
+                        : idx === 0 && team.vote_count > 0
                         ? 'bg-yellow-950/15 border-l-4 border-l-yellow-400'
                         : idx === 1 && team.vote_count > 0
                         ? 'bg-slate-800/15 border-l-4 border-l-slate-300'
@@ -633,6 +767,11 @@ export default function AdminBoothVotingPage() {
                             <span className="hidden md:inline text-xs text-text-tertiary truncate">
                               • {team.institution}
                             </span>
+                            {isJustVoted && (
+                              <span className="px-2 py-0.5 rounded-full bg-semantic-success text-slate-950 text-[10px] font-bold font-mono animate-bounce shadow-md">
+                                +1 VỪA VOTE!
+                              </span>
+                            )}
                           </div>
 
                           <div className="flex items-baseline gap-3 shrink-0">
@@ -677,55 +816,22 @@ export default function AdminBoothVotingPage() {
               <div className="flex flex-wrap items-center justify-between gap-4">
                 <div>
                   <h2 className="font-display text-lg font-bold text-text-primary">
-                    Bộ Mã QR Trực Tiếp Từng Gian Hàng — TOP 5 ĐỘI CHUNG KẾT
+                    Bộ Mã QR & Standee Trực Tiếp Từng Gian Hàng — TOP 5 ĐỘI CHUNG KẾT
                   </h2>
                   <p className="text-xs text-text-secondary mt-1">
-                    Mặc định Mã QR và Standee PNG được tạo với tên miền chính thức{' '}
-                    <strong className="text-brand-cyan font-mono">https://gendarena.com</strong> để
-                    in ấn ngay. Khi bạn đang chạy trên máy cá nhân, hệ thống hiển thị kèm link{' '}
-                    <strong className="text-semantic-warning font-mono">localhost</strong> bên dưới
-                    để bạn bấm test trực tiếp.
+                    Toàn bộ Mã QR và Standee PNG được chuẩn hóa với tên miền chính thức{' '}
+                    <strong className="text-brand-cyan font-mono">https://gendarena.com</strong>.
+                    BTC và các đội chỉ cần tải về và in ấn Standee đặt tại gian hàng ngày 08/11/2026.
                   </p>
                 </div>
-
-                {isLocalEnv && (
-                  <div className="flex items-center gap-1.5 p-1 rounded-xl bg-surface-raised border border-surface-border">
-                    <button
-                      type="button"
-                      onClick={() => setQrTargetEnv('PROD')}
-                      className={`px-3 py-1.5 rounded-lg text-xs font-mono font-semibold flex items-center gap-1.5 transition-all cursor-pointer ${
-                        qrTargetEnv === 'PROD'
-                          ? 'bg-brand-cyan text-slate-950'
-                          : 'text-text-secondary hover:text-text-primary'
-                      }`}
-                    >
-                      <Globe className="size-3.5" />
-                      <span>Mã QR: gendarena.com (Chuẩn Deploy)</span>
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => setQrTargetEnv('LOCAL')}
-                      className={`px-3 py-1.5 rounded-lg text-xs font-mono font-semibold flex items-center gap-1.5 transition-all cursor-pointer ${
-                        qrTargetEnv === 'LOCAL'
-                          ? 'bg-semantic-warning text-slate-950'
-                          : 'text-text-secondary hover:text-text-primary'
-                      }`}
-                    >
-                      <Laptop className="size-3.5" />
-                      <span>Mã QR: Localhost (Test)</span>
-                    </button>
-                  </div>
-                )}
               </div>
             </Card>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
               {teams.map((team) => {
                 const prodUrl = getProdVoteUrl(team)
-                const localUrl = getLocalVoteUrl(team)
                 const qrUrl = getActiveQrUrl(team)
                 const isProdCopied = copiedKey === `prod_${team.team_id}`
-                const isLocalCopied = copiedKey === `local_${team.team_id}`
 
                 return (
                   <Card
@@ -736,13 +842,11 @@ export default function AdminBoothVotingPage() {
                     <div className="shrink-0 flex flex-col items-center gap-2">
                       <QrSvg value={qrUrl} size={172} />
                       <span className="text-[11px] font-mono text-brand-cyan font-semibold">
-                        {qrTargetEnv === 'LOCAL' && isLocalEnv
-                          ? 'QR: Localhost'
-                          : 'QR: gendarena.com'}
+                        QR: gendarena.com
                       </span>
                     </div>
 
-                    {/* Team Metadata & Both Links (Production + Local Test) */}
+                    {/* Team Metadata & Official Production Link */}
                     <div className="flex-1 min-w-0 space-y-3 text-center sm:text-left w-full">
                       <div>
                         <div className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded bg-brand-cyan/15 text-brand-cyan font-mono text-xs font-bold mb-1">
@@ -758,7 +862,7 @@ export default function AdminBoothVotingPage() {
                       <div className="space-y-1 text-left">
                         <span className="text-[10px] font-mono uppercase tracking-wider text-brand-cyan flex items-center gap-1">
                           <Globe className="size-3" />
-                          Link Chính Thức (Deploy Production):
+                          Link Bình Chọn Chính Thức:
                         </span>
                         <div className="flex items-center gap-1.5">
                           <div className="flex-1 p-2 rounded-lg bg-surface-raised border border-brand-cyan/30 font-mono text-[11px] text-brand-cyan truncate">
@@ -781,43 +885,6 @@ export default function AdminBoothVotingPage() {
                         </div>
                       </div>
 
-                      {/* Local Test URL (Shown when running on localhost for instant testing) */}
-                      {isLocalEnv && (
-                        <div className="space-y-1 text-left">
-                          <span className="text-[10px] font-mono uppercase tracking-wider text-semantic-warning flex items-center gap-1">
-                            <Laptop className="size-3" />
-                            Link Test Local (Trên máy của bạn):
-                          </span>
-                          <div className="flex items-center gap-1.5">
-                            <div className="flex-1 p-2 rounded-lg bg-surface-raised border border-semantic-warning/30 font-mono text-[11px] text-semantic-warning truncate">
-                              {localUrl}
-                            </div>
-                            <Button
-                              variant="secondary"
-                              size="sm"
-                              onClick={() => handleCopyText(`local_${team.team_id}`, localUrl)}
-                              leftIcon={
-                                isLocalCopied ? (
-                                  <Check className="size-3.5 text-semantic-success" />
-                                ) : (
-                                  <Copy className="size-3.5" />
-                                )
-                              }
-                            >
-                              {isLocalCopied ? 'Đã copy' : 'Copy'}
-                            </Button>
-                            <Link
-                              href={`/vote/booth/${team.slug}`}
-                              target="_blank"
-                              className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-semantic-warning/15 border border-semantic-warning/40 hover:bg-semantic-warning/25 text-xs font-semibold text-semantic-warning transition-colors shrink-0"
-                            >
-                              <span>Test ngay</span>
-                              <ExternalLink className="size-3" />
-                            </Link>
-                          </div>
-                        </div>
-                      )}
-
                       <div className="flex flex-wrap items-center justify-center sm:justify-start gap-2 pt-1">
                         <Button
                           variant="primary"
@@ -827,17 +894,14 @@ export default function AdminBoothVotingPage() {
                         >
                           Tải Standee QR (PNG)
                         </Button>
-
-                        {!isLocalEnv && (
-                          <Link
-                            href={`/vote/booth/${team.slug}`}
-                            target="_blank"
-                            className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg border border-surface-border hover:border-brand-cyan text-xs text-text-secondary hover:text-brand-cyan transition-colors"
-                          >
-                            <span>Mở trang bình chọn</span>
-                            <ExternalLink className="size-3" />
-                          </Link>
-                        )}
+                        <Link
+                          href={`/vote/booth/${team.slug}`}
+                          target="_blank"
+                          className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-surface-raised hover:bg-surface-elevated border border-surface-border text-xs font-semibold text-text-secondary hover:text-brand-cyan transition-colors"
+                        >
+                          <span>Xem trước trang</span>
+                          <ExternalLink className="size-3" />
+                        </Link>
                       </div>
                     </div>
                   </Card>
@@ -857,7 +921,7 @@ export default function AdminBoothVotingPage() {
                   Điều Khiển Đóng / Mở Cổng Bình Chọn
                 </CardTitle>
                 <CardDescription className="text-xs mt-1">
-                  Mặc định hệ thống tự động mở lúc 14:00:00 và đóng lúc 15:30:00 ngày 08/11/2026
+                  Mặc định hệ thống tự động mở lúc 15:30:00 và đóng lúc 16:30:00 ngày 08/11/2026
                   (GMT+7). BTC có thể mở sớm để kiểm thử hoặc điều chỉnh trực tiếp tại sự kiện.
                 </CardDescription>
               </CardHeader>
@@ -868,13 +932,13 @@ export default function AdminBoothVotingPage() {
                     {
                       mode: 'auto' as BoothGateMode,
                       title: 'Tự động theo lịch chuẩn (Khuyên dùng)',
-                      desc: 'Tự động mở từ 14:00:00 đến 15:30:00 ngày 08/11/2026',
+                      desc: 'Tự động mở từ 15:30:00 đến 16:30:00 ngày 08/11/2026',
                       icon: Clock,
                     },
                     {
                       mode: 'force_open' as BoothGateMode,
-                      title: 'Mở cổng ngay lập tức (Force Open)',
-                      desc: 'Cho phép khán giả quét QR và bấm Bình chọn ngay bây giờ (dùng để test hoặc khi trễ lịch)',
+                      title: 'Mở cổng thủ công (Force Open)',
+                      desc: 'Chỉ kích hoạt khi Trưởng BTC yêu cầu mở cổng sớm ngoài khung giờ',
                       icon: Unlock,
                     },
                     {
@@ -988,6 +1052,34 @@ export default function AdminBoothVotingPage() {
                     </Badge>
                   </button>
                 </div>
+              </CardContent>
+            </Card>
+
+            {/* DANGER ZONE: PURGE TEST DATA */}
+            <Card className="md:col-span-2 p-6 border-semantic-danger/40 bg-semantic-danger/5 space-y-4">
+              <CardHeader className="p-0">
+                <CardTitle className="text-lg flex items-center gap-2 text-semantic-danger">
+                  <AlertTriangle className="size-5" />
+                  Vùng Nguy Hiểm: Dọn Sạch Dữ Liệu Test & Đặt Lại Điểm Về 0
+                </CardTitle>
+                <CardDescription className="text-xs text-text-secondary mt-1">
+                  Xóa toàn bộ các lượt bình chọn thử nghiệm đã lưu, đưa số phiếu của toàn bộ TOP 5 đội thi về 0, xóa bộ nhớ cache và đặt cổng về chế độ <strong>Tự Động (15:30 – 16:30, 08/11/2026)</strong>.
+                </CardDescription>
+              </CardHeader>
+
+              <CardContent className="p-0 pt-2 flex items-center justify-between gap-4">
+                <p className="text-xs text-text-tertiary">
+                  Chỉ bấm nút này trước khi bắt đầu phần thi chính thức để đảm bảo tính minh bạch tuyệt đối.
+                </p>
+                <Button
+                  variant="danger"
+                  size="sm"
+                  disabled={resettingData}
+                  onClick={handleResetTestData}
+                  leftIcon={<Trash2 className="size-4" />}
+                >
+                  {resettingData ? 'Đang dọn dữ liệu...' : 'Xác Nhận Xóa Dữ Liệu Test & Đặt Lại 0 Điểm'}
+                </Button>
               </CardContent>
             </Card>
           </div>

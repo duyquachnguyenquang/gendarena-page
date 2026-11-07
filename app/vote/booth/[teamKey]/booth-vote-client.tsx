@@ -21,6 +21,7 @@ import {
   solveChallengePoW,
   getLocalVoteReceipt,
   saveLocalVoteReceipt,
+  clearLocalVoteReceipt,
   type DeviceSecurityPayload,
 } from '@/lib/device-fingerprint'
 
@@ -102,14 +103,19 @@ export default function BoothVoteClient({
         return
       }
 
-      if (localReceipt || data.alreadyVoted) {
-        setReceiptCode(localReceipt?.receiptCode || data.receiptCode || `BV-${team.msbc}-VERIFIED`)
+      if (data.alreadyVoted) {
+        setReceiptCode(data.receiptCode || localReceipt?.receiptCode || `BV-${team.msbc}-VERIFIED`)
         setVotedAt(localReceipt?.votedAt || new Date().toISOString())
         setStatusMessage(
           'Mỗi thiết bị / địa chỉ IP chỉ được bình chọn 1 lần duy nhất cho mỗi đội thi.'
         )
         setUiState('ALREADY_VOTED')
         return
+      }
+
+      // If server confirmed device has NOT voted in this official session, clear any stale test receipts
+      if (localReceipt) {
+        await clearLocalVoteReceipt(team.id)
       }
 
       setUiState('READY')
@@ -122,7 +128,7 @@ export default function BoothVoteClient({
     verifySessionWithServer()
   }, [verifySessionWithServer])
 
-  // Live countdown timer for 14:00 - 15:30 08/11/2026
+  // Live countdown timer for 15:30 - 16:30 08/11/2026
   useEffect(() => {
     const updateTimer = () => {
       const now = Date.now()
@@ -141,7 +147,7 @@ export default function BoothVoteClient({
             : `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`
         )
       } else if (gate.phase === 'UPCOMING' && now >= startMs && now <= endMs) {
-        // Automatically unlock when 14:00 arrives!
+        // Automatically unlock when 15:30 arrives!
         setGate({ isOpen: true, phase: 'ACTIVE', serverTime: new Date(now).toISOString() })
       } else if (gate.isOpen && now <= endMs) {
         const diff = Math.max(0, endMs - now)
@@ -273,7 +279,7 @@ export default function BoothVoteClient({
           ) : gate.phase === 'UPCOMING' ? (
             <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-semantic-warning/15 border border-semantic-warning/40 text-semantic-warning text-[11px] font-mono font-semibold">
               <Clock className="size-3" />
-              <span>14:00 – 15:30</span>
+              <span>15:30 – 16:30</span>
             </div>
           ) : (
             <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-surface-raised border border-surface-border text-text-tertiary text-[11px] font-mono">
@@ -461,7 +467,7 @@ export default function BoothVoteClient({
                       </div>
                       <p className="text-xs text-text-secondary">
                         Phần thi gian hàng diễn ra từ{' '}
-                        <strong className="text-text-primary">14:00 đến 15:30 ngày 08/11/2026</strong>.
+                        <strong className="text-text-primary">15:30 đến 16:30 ngày 08/11/2026</strong>.
                       </p>
                       {countdownText && (
                         <div className="pt-1 font-mono text-lg font-bold text-semantic-warning tracking-wider">
@@ -476,7 +482,7 @@ export default function BoothVoteClient({
                         <span>Cổng bình chọn gian hàng đã khép lại</span>
                       </div>
                       <p className="text-xs text-text-tertiary">
-                        Thời gian bình chọn (14:00 – 15:30 ngày 08/11/2026) đã kết thúc.
+                        Thời gian bình chọn (15:30 – 16:30 ngày 08/11/2026) đã kết thúc.
                       </p>
                     </div>
                   )}

@@ -331,6 +331,43 @@ export async function saveLocalVoteReceipt(receipt: LocalVoteReceipt): Promise<v
   } catch {}
 }
 
+export async function clearLocalVoteReceipt(teamId: string): Promise<void> {
+  const key = `${STORAGE_PREFIX}${teamId}`
+
+  // 1. Clear LocalStorage & SessionStorage
+  try {
+    localStorage.removeItem(key)
+    sessionStorage.removeItem(key)
+  } catch {}
+
+  // 2. Clear Cookie
+  try {
+    document.cookie = `${key}=; max-age=0; path=/; SameSite=Lax`
+  } catch {}
+
+  // 3. Clear CacheStorage
+  try {
+    if ('caches' in window) {
+      const cache = await caches.open(CACHE_NAME)
+      await cache.delete(`https://booth-receipt.local/${teamId}`)
+    }
+  } catch {}
+
+  // 4. Clear IndexedDB
+  try {
+    if ('indexedDB' in window) {
+      const req = indexedDB.open(IDB_NAME, 1)
+      req.onsuccess = () => {
+        const db = req.result
+        if (db.objectStoreNames.contains(IDB_STORE)) {
+          const tx = db.transaction([IDB_STORE], 'readwrite')
+          tx.objectStore(IDB_STORE).delete(teamId)
+        }
+      }
+    }
+  } catch {}
+}
+
 export async function getLocalVoteReceipt(teamId: string): Promise<LocalVoteReceipt | null> {
   const key = `${STORAGE_PREFIX}${teamId}`
 

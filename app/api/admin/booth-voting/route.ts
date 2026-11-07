@@ -4,6 +4,7 @@ import {
   getBoothVotingDashboardData,
   evaluateBoothGateStatus,
   updateBoothVotingSettings,
+  resetBoothVotingTestData,
   type BoothGateMode,
   type BoothIpMode,
 } from '@/lib/booth-voting'
@@ -110,5 +111,36 @@ export async function PATCH(request: NextRequest) {
       { error: 'Không thể cập nhật cấu hình bình chọn gian hàng.' },
       { status: 500 }
     )
+  }
+}
+
+export async function POST(request: NextRequest) {
+  try {
+    const auth = await verifyAdminSession()
+    if (!auth.isAdmin) {
+      return NextResponse.json({ error: 'Unauthorized: Chỉ dành cho BTC.' }, { status: 403 })
+    }
+
+    const body = await request.json().catch(() => ({}))
+    if (body.action === 'reset_data') {
+      const result = await resetBoothVotingTestData()
+      const dashboard = await getBoothVotingDashboardData(true)
+      const gate = evaluateBoothGateStatus(dashboard.settings)
+
+      return NextResponse.json({
+        success: true,
+        message: result.message,
+        settings: dashboard.settings,
+        gate,
+        teams: dashboard.teams,
+        totalVotes: 0,
+        totalBlocked: 0,
+      })
+    }
+
+    return NextResponse.json({ error: 'Hành động không hợp lệ.' }, { status: 400 })
+  } catch (error) {
+    console.error('[API POST /api/admin/booth-voting] Error:', error)
+    return NextResponse.json({ error: 'Không thể reset dữ liệu bình chọn.' }, { status: 500 })
   }
 }

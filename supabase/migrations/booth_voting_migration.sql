@@ -1,5 +1,5 @@
 -- ==============================================================================
--- Migration: Booth Voting System for Grand Finale (08/11/2026 14:00 - 15:30 GMT+7)
+-- Migration: Booth Voting System for Grand Finale (08/11/2026 15:30 - 16:30 GMT+7)
 -- File: supabase/migrations/booth_voting_migration.sql
 -- Safe & Idempotent: Can be run multiple times without data loss.
 -- Zero-PII: Stores only one-way cryptographic hashes (SHA-256), never personal data.
@@ -9,15 +9,15 @@
 CREATE TABLE IF NOT EXISTS public.booth_voting_settings (
   id TEXT PRIMARY KEY DEFAULT 'default',
   gate_mode TEXT NOT NULL DEFAULT 'auto' CHECK (gate_mode IN ('auto', 'force_open', 'force_closed')),
-  start_time TIMESTAMPTZ NOT NULL DEFAULT '2026-11-08T14:00:00+07:00',
-  end_time TIMESTAMPTZ NOT NULL DEFAULT '2026-11-08T15:30:00+07:00',
+  start_time TIMESTAMPTZ NOT NULL DEFAULT '2026-11-08T15:30:00+07:00',
+  end_time TIMESTAMPTZ NOT NULL DEFAULT '2026-11-08T16:30:00+07:00',
   ip_mode TEXT NOT NULL DEFAULT 'strict' CHECK (ip_mode IN ('strict', 'venue_wifi')),
   block_vpn BOOLEAN NOT NULL DEFAULT true,
   updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 
 INSERT INTO public.booth_voting_settings (id, gate_mode, start_time, end_time, ip_mode, block_vpn)
-VALUES ('default', 'auto', '2026-11-08T14:00:00+07:00', '2026-11-08T15:30:00+07:00', 'strict', true)
+VALUES ('default', 'auto', '2026-11-08T15:30:00+07:00', '2026-11-08T16:30:00+07:00', 'strict', true)
 ON CONFLICT (id) DO NOTHING;
 
 -- 2. Table: booth_vote_counts (Pre-aggregated atomic counters for instant Realtime BTC dashboard)
@@ -156,7 +156,7 @@ BEGIN
   WHERE id = 'default';
 
   IF NOT FOUND THEN
-    v_is_open := (v_now >= '2026-11-08T14:00:00+07:00'::timestamptz AND v_now <= '2026-11-08T15:30:00+07:00'::timestamptz);
+    v_is_open := (v_now >= '2026-11-08T15:30:00+07:00'::timestamptz AND v_now <= '2026-11-08T16:30:00+07:00'::timestamptz);
   ELSE
     IF v_settings.gate_mode = 'force_open' THEN
       v_is_open := true;
@@ -171,7 +171,7 @@ BEGIN
     RETURN jsonb_build_object(
       'success', false,
       'code', 'GATE_CLOSED',
-      'message', 'Cổng bình chọn gian hàng chỉ mở từ 14:00 đến 15:30 ngày 08/11/2026.'
+      'message', 'Cổng bình chọn gian hàng chỉ mở từ 15:30 đến 16:30 ngày 08/11/2026.'
     );
   END IF;
 
